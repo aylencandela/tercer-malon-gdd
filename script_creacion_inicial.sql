@@ -688,3 +688,55 @@ ELSE
     PRINT '<<< FAILED CREATING TABLE pago_venta >>>'
 go
 
+
+CREATE PROCEDURE MigrarTipoInmueble
+AS
+	INSERT INTO TERCER_MALON.tipo_inmueble
+		select distinct INMUEBLE_TIPO_INMUEBLE from gd_esquema.Maestra
+		where INMUEBLE_TIPO_INMUEBLE is not null
+		order by 1
+GO
+
+CREATE PROCEDURE MigrarMedioPago
+AS
+	INSERT INTO TERCER_MALON.medio_pago
+		select distinct PAGO_ALQUILER_MEDIO_PAGO as medio_pago from gd_esquema.Maestra
+		where PAGO_ALQUILER_MEDIO_PAGO is not null
+		union
+		select distinct PAGO_VENTA_MEDIO_PAGO from gd_esquema.Maestra
+		where PAGO_VENTA_MEDIO_PAGO is not null
+		order by 1
+GO
+
+CREATE PROCEDURE MigrarEstadoAnuncio
+AS
+	INSERT INTO TERCER_MALON.estado_anuncio
+		select distinct ANUNCIO_ESTADO from gd_esquema.Maestra
+		where ANUNCIO_ESTADO is not null
+		order by 1
+GO
+
+CREATE PROCEDURE MigrarEstadoAlquiler
+AS
+	INSERT INTO TERCER_MALON.estado_alquiler
+		select distinct ALQUILER_ESTADO from gd_esquema.Maestra
+		where ALQUILER_ESTADO is not null
+		order by 1
+GO
+
+CREATE PROCEDURE MigrarOperacion
+AS
+	INSERT INTO TERCER_MALON.operacion
+		select SUBSTRING(ANUNCIO_TIPO_OPERACION, LEN('Tipo Operación')+2,30) from gd_esquema.Maestra
+		where ANUNCIO_TIPO_OPERACION is not null
+		group by ANUNCIO_TIPO_OPERACION
+		order by 1
+GO
+
+CREATE PROCEDURE MigrarAmbiente
+AS
+	INSERT INTO TERCER_MALON.ambiente
+		select distinct INMUEBLE_CANT_AMBIENTES from gd_esquema.Maestra
+		where INMUEBLE_CANT_AMBIENTES is not null
+		order by 1
+GO
