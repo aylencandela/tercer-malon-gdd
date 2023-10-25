@@ -40,7 +40,7 @@ go
 
 CREATE TABLE TERCER_MALON.localidad(
     id_localidad    numeric(18, 0)    IDENTITY(1,1),
-    nombre          nvarchar(18)      NULL,
+    nombre          nvarchar(100)      NULL,
     id_provincia    numeric(18, 0)    NOT NULL,
     CONSTRAINT PK_localidad PRIMARY KEY NONCLUSTERED (id_localidad), 
     CONSTRAINT FK_provincia_localidad FOREIGN KEY (id_provincia)
@@ -85,7 +85,7 @@ go
  */
 
 CREATE TABLE TERCER_MALON.agente(
-    id_persona          numeric(18, 0)    IDENTITY(1,1),
+    id_agente           numeric(18, 0)    IDENTITY(1,1),
     nombre              nvarchar(100)     NOT NULL,
     apellido            nvarchar(10)      NOT NULL,
     dni                 numeric(18, 0)    NOT NULL,
@@ -94,7 +94,7 @@ CREATE TABLE TERCER_MALON.agente(
     telefono            nvarchar(100)     NOT NULL,
     mail                nvarchar(100)     NOT NULL,
     cod_sucursal        numeric(18, 0)    NOT NULL,
-    CONSTRAINT PK_agente PRIMARY KEY NONCLUSTERED (id_persona), 
+    CONSTRAINT PK_agente PRIMARY KEY NONCLUSTERED (id_agente), 
     CONSTRAINT FK_sucursal_agente FOREIGN KEY (cod_sucursal)
     REFERENCES TERCER_MALON.sucursal(cod_sucursal)
 )
@@ -387,10 +387,10 @@ CREATE TABLE TERCER_MALON.anuncio(
     id_estado_anuncio    numeric(18, 0)    NOT NULL,
     id_moneda            numeric(18, 0)    NOT NULL,
     cod_inmueble         numeric(18, 0)    NOT NULL,
-    id_persona           numeric(18, 0)    NOT NULL,
+    id_agente           numeric(18, 0)    NOT NULL,
     CONSTRAINT PK_anuncio PRIMARY KEY NONCLUSTERED (cod_anuncio), 
-    CONSTRAINT FK_agente_anuncio FOREIGN KEY (id_persona)
-    REFERENCES TERCER_MALON.agente(id_persona),
+    CONSTRAINT FK_agente_anuncio FOREIGN KEY (id_agente)
+    REFERENCES TERCER_MALON.agente(id_agente),
     CONSTRAINT FK_estado_anuncio_anuncio FOREIGN KEY (id_estado_anuncio)
     REFERENCES TERCER_MALON.estado_anuncio(id_estado_anuncio),
     CONSTRAINT FK_inmueble_anuncio FOREIGN KEY (cod_inmueble)
@@ -688,8 +688,15 @@ ELSE
     PRINT '<<< FAILED CREATING TABLE pago_venta >>>'
 go
 
+--------------------------------------
+------------ PROCEDURES --------------
+--------------------------------------
 
-CREATE PROCEDURE MigrarTipoInmueble
+IF EXISTS (SELECT * FROM sys.objects WHERE name = 'MigrarTipoInmueble')
+DROP PROCEDURE TERCER_MALON.MigrarTipoInmueble
+GO
+
+CREATE PROCEDURE TERCER_MALON.MigrarTipoInmueble
 AS
 	INSERT INTO TERCER_MALON.tipo_inmueble
 		select distinct INMUEBLE_TIPO_INMUEBLE from gd_esquema.Maestra
@@ -697,7 +704,13 @@ AS
 		order by 1
 GO
 
-CREATE PROCEDURE MigrarMedioPago
+-----------------------
+
+IF EXISTS (SELECT * FROM sys.objects WHERE name = 'MigrarMedioPago')
+DROP PROCEDURE TERCER_MALON.MigrarMedioPago
+GO
+
+CREATE PROCEDURE TERCER_MALON.MigrarMedioPago
 AS
 	INSERT INTO TERCER_MALON.medio_pago
 		select distinct PAGO_ALQUILER_MEDIO_PAGO as medio_pago from gd_esquema.Maestra
@@ -708,7 +721,13 @@ AS
 		order by 1
 GO
 
-CREATE PROCEDURE MigrarEstadoAnuncio
+-------------------
+
+IF EXISTS (SELECT * FROM sys.objects WHERE name = 'MigrarEstadoAnuncio')
+DROP PROCEDURE TERCER_MALON.MigrarEstadoAnuncio
+GO
+
+CREATE PROCEDURE TERCER_MALON.MigrarEstadoAnuncio
 AS
 	INSERT INTO TERCER_MALON.estado_anuncio
 		select distinct ANUNCIO_ESTADO from gd_esquema.Maestra
@@ -716,7 +735,13 @@ AS
 		order by 1
 GO
 
-CREATE PROCEDURE MigrarEstadoAlquiler
+--------------------
+
+IF EXISTS (SELECT * FROM sys.objects WHERE name = 'MigrarEstadoAlquiler')
+DROP PROCEDURE TERCER_MALON.MigrarEstadoAlquiler
+GO
+
+CREATE PROCEDURE TERCER_MALON.MigrarEstadoAlquiler
 AS
 	INSERT INTO TERCER_MALON.estado_alquiler
 		select distinct ALQUILER_ESTADO from gd_esquema.Maestra
@@ -724,7 +749,13 @@ AS
 		order by 1
 GO
 
-CREATE PROCEDURE MigrarOperacion
+------------------------
+
+IF EXISTS (SELECT * FROM sys.objects WHERE name = 'MigrarOperacion')
+DROP PROCEDURE TERCER_MALON.MigrarOperacion
+GO
+
+CREATE PROCEDURE TERCER_MALON.MigrarOperacion
 AS
 	INSERT INTO TERCER_MALON.operacion
 		select SUBSTRING(ANUNCIO_TIPO_OPERACION, LEN('Tipo Operación')+2,30) from gd_esquema.Maestra
@@ -733,10 +764,200 @@ AS
 		order by 1
 GO
 
-CREATE PROCEDURE MigrarAmbiente
+-----------------------
+
+IF EXISTS (SELECT * FROM sys.objects WHERE name = 'MigrarAmbiente')
+DROP PROCEDURE TERCER_MALON.MigrarAmbiente
+GO
+
+CREATE PROCEDURE TERCER_MALON.MigrarAmbiente
 AS
 	INSERT INTO TERCER_MALON.ambiente
 		select distinct INMUEBLE_CANT_AMBIENTES from gd_esquema.Maestra
 		where INMUEBLE_CANT_AMBIENTES is not null
 		order by 1
 GO
+
+-------------------------------------------
+
+IF EXISTS (SELECT * FROM sys.objects WHERE name = 'migrarProvincia')
+DROP PROCEDURE TERCER_MALON.migrarProvincia
+GO
+
+CREATE PROCEDURE TERCER_MALON.migrarProvincia AS
+BEGIN
+	INSERT INTO TERCER_MALON.provincia(
+		nombre
+	)
+		SELECT DISTINCT 
+			M.INMUEBLE_PROVINCIA 
+		FROM 
+			gd_esquema.Maestra M
+		where M.INMUEBLE_PROVINCIA is not null
+		order by 1
+END
+GO
+-------------------------------------------------------
+
+IF EXISTS (SELECT * FROM sys.objects WHERE name = 'migrarLocalidad')
+DROP PROCEDURE TERCER_MALON.migrarLocalidad
+GO
+
+CREATE PROCEDURE TERCER_MALON.migrarLocalidad AS
+BEGIN
+	INSERT INTO TERCER_MALON.localidad (
+		nombre,
+		id_provincia
+	)
+
+		SELECT
+			M.INMUEBLE_LOCALIDAD,
+			P.id_provincia
+		FROM
+             gd_esquema.Maestra M
+			 JOIN TERCER_MALON.provincia P  ON P.nombre = M.INMUEBLE_PROVINCIA
+         WHERE
+             M.INMUEBLE_LOCALIDAD IS NOT NULL
+		UNION
+		SELECT
+			M.SUCURSAL_LOCALIDAD,
+			P.id_provincia
+		FROM
+             gd_esquema.Maestra M
+			 JOIN TERCER_MALON.provincia P  ON P.nombre = M.SUCURSAL_PROVINCIA
+         WHERE
+             M.SUCURSAL_LOCALIDAD IS NOT NULL
+		ORDER BY 1
+END
+GO
+-------------------------------------------
+IF EXISTS (SELECT * FROM sys.objects WHERE name = 'migrarBarrio')
+DROP PROCEDURE TERCER_MALON.migrarBarrio
+GO
+
+CREATE PROCEDURE TERCER_MALON.migrarBarrio AS
+BEGIN
+	INSERT INTO TERCER_MALON.barrio(
+		nombre,
+		id_localidad
+	)
+		SELECT DISTINCT 
+			M.INMUEBLE_BARRIO,
+			L.id_localidad
+		FROM
+             gd_esquema.Maestra M
+			 JOIN TERCER_MALON.localidad L  ON L.nombre = M.INMUEBLE_LOCALIDAD
+         WHERE
+             M.INMUEBLE_LOCALIDAD IS NOT NULL
+END
+GO
+----------------------------------------------
+IF EXISTS (SELECT * FROM sys.objects WHERE name = 'migrarSucursal')
+DROP PROCEDURE TERCER_MALON.migrarSucursal
+GO
+
+CREATE PROCEDURE TERCER_MALON.migrarSucursal AS
+BEGIN
+	INSERT INTO TERCER_MALON.sucursal(
+		cod_sucursal,
+		nombre,
+		direccion,
+		telefono,
+		id_localidad
+	)
+		SELECT DISTINCT 
+			M.SUCURSAL_CODIGO, 
+			M.SUCURSAL_NOMBRE, 
+			M.SUCURSAL_DIRECCION, 
+			M.SUCURSAL_TELEFONO, 
+			L.id_localidad 
+		FROM gd_esquema.Maestra M
+		JOIN TERCER_MALON.localidad L ON L.nombre = M.SUCURSAL_LOCALIDAD
+END
+GO
+-------------------------------------------------
+IF EXISTS (SELECT * FROM sys.objects WHERE name = 'migrarMoneda')
+DROP PROCEDURE TERCER_MALON.migrarMoneda
+GO
+
+CREATE PROCEDURE TERCER_MALON.migrarMoneda AS
+BEGIN
+	INSERT INTO TERCER_MALON.moneda(
+		nombre,
+		simbolo
+	)
+		SELECT
+			M.ANUNCIO_MONEDA,
+			CASE WHEN M.ANUNCIO_MONEDA = 'Moneda Pesos' THEN '$'
+			ELSE 'U$D'
+			END
+		FROM gd_esquema.Maestra M
+		WHERE M.ANUNCIO_MONEDA is not null
+		UNION
+		SELECT 
+			M.PAGO_VENTA_MONEDA,
+			CASE WHEN M.PAGO_VENTA_MONEDA = 'Moneda Pesos' THEN '$'
+			ELSE 'U$D'
+			END
+		FROM gd_esquema.Maestra M
+		WHERE M.PAGO_VENTA_MONEDA is not null
+		UNION
+		SELECT 
+			M.VENTA_MONEDA,
+			CASE WHEN M.VENTA_MONEDA = 'Moneda Pesos' THEN '$'
+			ELSE 'U$D'
+			END
+		FROM gd_esquema.Maestra M
+		WHERE M.VENTA_MONEDA is not null
+END
+GO
+
+---------------------------------------------
+IF EXISTS (SELECT * FROM sys.objects WHERE name = 'migrarAgente')
+DROP PROCEDURE TERCER_MALON.migrarAgente
+GO
+
+CREATE PROCEDURE TERCER_MALON.migrarAgente AS
+BEGIN
+	INSERT INTO TERCER_MALON.agente(
+		nombre,
+		apellido,
+		dni,
+		fecha_registro,
+		fecha_nacimiento,
+		telefono,
+		mail,
+		cod_sucursal
+	)
+	SELECT DISTINCT
+		M.AGENTE_NOMBRE,
+		M.AGENTE_APELLIDO,
+		M.AGENTE_DNI,
+		M.AGENTE_FECHA_REGISTRO,
+		M.AGENTE_FECHA_NAC,
+		M.AGENTE_TELEFONO,
+		M.AGENTE_MAIL,
+		S.cod_sucursal
+	FROM gd_esquema.Maestra M
+	JOIN TERCER_MALON.sucursal S ON S.cod_sucursal = M.SUCURSAL_CODIGO
+END
+GO
+
+
+--------------------------------------
+---------- DATA MIGRATION ------------
+--------------------------------------
+
+BEGIN TRANSACTION 
+	EXECUTE TERCER_MALON.migrarProvincia
+	EXECUTE TERCER_MALON.migrarLocalidad
+	EXECUTE TERCER_MALON.migrarBarrio
+	EXECUTE TERCER_MALON.migrarSucursal
+	EXECUTE TERCER_MALON.migrarAgente
+	EXECUTE TERCER_MALON.MigrarAmbiente
+	EXECUTE TERCER_MALON.MigrarMedioPago
+	EXECUTE TERCER_MALON.MigrarEstadoAlquiler
+	EXECUTE TERCER_MALON.MigrarEstadoAnuncio
+	EXECUTE TERCER_MALON.MigrarOperacion
+	EXECUTE TERCER_MALON.MigrarTipoInmueble
+COMMIT TRANSACTION

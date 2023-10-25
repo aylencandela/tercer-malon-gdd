@@ -9,192 +9,192 @@
 
 USE GD2C2023
 GO
-IF OBJECT_ID('alquiler') IS NOT NULL
+IF OBJECT_ID('TERCER_MALON.alquiler') IS NOT NULL
 BEGIN
-    DROP TABLE alquiler
+    drop table TERCER_MALON.alquiler
     PRINT '<<< DROPPED TABLE alquiler >>>'
 END
 
 go
-IF OBJECT_ID('anuncio') IS NOT NULL
+IF OBJECT_ID('TERCER_MALON.anuncio') IS NOT NULL
 BEGIN
-    DROP TABLE anuncio
+    drop table TERCER_MALON.anuncio
     PRINT '<<< DROPPED TABLE anuncio >>>'
 END
 go
 --AYLU
-IF OBJECT_ID('agente') IS NOT NULL
+IF OBJECT_ID('TERCER_MALON.agente') IS NOT NULL
 BEGIN
-    DROP TABLE agente
+    drop table TERCER_MALON.agente
     PRINT '<<< DROPPED TABLE agente >>>'
 END
 go
 -- FACU
-IF OBJECT_ID('caracteristica') IS NOT NULL
+IF OBJECT_ID('TERCER_MALON.caracteristica') IS NOT NULL
 BEGIN
-    DROP TABLE caracteristica
+    drop table TERCER_MALON.caracteristica
     PRINT '<<< DROPPED TABLE caracteristica >>>'
 END
 go
-IF OBJECT_ID('caracteristica_x_inmueble') IS NOT NULL
+IF OBJECT_ID('TERCER_MALON.caracteristica_x_inmueble') IS NOT NULL
 BEGIN
-    DROP TABLE caracteristica_x_inmueble
+    drop table TERCER_MALON.caracteristica_x_inmueble
     PRINT '<<< DROPPED TABLE caracteristica_x_inmueble >>>'
 END
 go
 -- JULI
-IF OBJECT_ID('comprador') IS NOT NULL
+IF OBJECT_ID('TERCER_MALON.comprador') IS NOT NULL
 BEGIN
-    DROP TABLE comprador
+    drop table TERCER_MALON.comprador
     PRINT '<<< DROPPED TABLE comprador >>>'
 END
 go
-IF OBJECT_ID('detalle_alquiler') IS NOT NULL
+IF OBJECT_ID('TERCER_MALON.detalle_alquiler') IS NOT NULL
 BEGIN
-    DROP TABLE detalle_alquiler
+    drop table TERCER_MALON.detalle_alquiler
     PRINT '<<< DROPPED TABLE detalle_alquiler >>>'
 END
 go
 -- JOHA
-IF OBJECT_ID('estado_alquiler') IS NOT NULL
+IF OBJECT_ID('TERCER_MALON.estado_alquiler') IS NOT NULL
 BEGIN
-    DROP TABLE estado_alquiler
+    drop table TERCER_MALON.estado_alquiler
     PRINT '<<< DROPPED TABLE estado_alquiler >>>'
 END
 go
 -- JOHA
-IF OBJECT_ID('estado_anuncio') IS NOT NULL
+IF OBJECT_ID('TERCER_MALON.estado_anuncio') IS NOT NULL
 BEGIN
-    DROP TABLE estado_anuncio
+    drop table TERCER_MALON.estado_anuncio
     PRINT '<<< DROPPED TABLE estado_anuncio >>>'
 END
 go
-IF OBJECT_ID('inmueble') IS NOT NULL
+IF OBJECT_ID('TERCER_MALON.inmueble') IS NOT NULL
 BEGIN
-    DROP TABLE inmueble
+    drop table TERCER_MALON.inmueble
     PRINT '<<< DROPPED TABLE inmueble >>>'
 END
 go
 -- JULI
-IF OBJECT_ID('inquilino') IS NOT NULL
+IF OBJECT_ID('TERCER_MALON.inquilino') IS NOT NULL
 BEGIN
-    DROP TABLE inquilino
+    drop table TERCER_MALON.inquilino
     PRINT '<<< DROPPED TABLE inquilino >>>'
 END
 go
 -- JOHA
-IF OBJECT_ID('medio_pago') IS NOT NULL
+IF OBJECT_ID('TERCER_MALON.medio_pago') IS NOT NULL
 BEGIN
-    DROP TABLE medio_pago
+    drop table TERCER_MALON.medio_pago
     PRINT '<<< DROPPED TABLE medio_pago >>>'
 END
 go
 -- AYLU
-IF OBJECT_ID('moneda') IS NOT NULL 
+IF OBJECT_ID('TERCER_MALON.moneda') IS NOT NULL 
 BEGIN
-    DROP TABLE moneda
+    drop table TERCER_MALON.moneda
     PRINT '<<< DROPPED TABLE moneda >>>'
 END
 go
 -- JOHA
-IF OBJECT_ID('operacion') IS NOT NULL
+IF OBJECT_ID('TERCER_MALON.operacion') IS NOT NULL
 BEGIN
-    DROP TABLE operacion
+    drop table TERCER_MALON.operacion
     PRINT '<<< DROPPED TABLE operacion >>>'
 END
 go
 -- FACU
-IF OBJECT_ID('orientacion') IS NOT NULL 
+IF OBJECT_ID('TERCER_MALON.orientacion') IS NOT NULL 
 BEGIN
-    DROP TABLE orientacion
+    drop table TERCER_MALON.orientacion
     PRINT '<<< DROPPED TABLE orientacion >>>'
 END
 go
-IF OBJECT_ID('pago_alquiler') IS NOT NULL
+IF OBJECT_ID('TERCER_MALON.pago_alquiler') IS NOT NULL
 BEGIN
-    DROP TABLE pago_alquiler
+    drop table TERCER_MALON.pago_alquiler
     PRINT '<<< DROPPED TABLE pago_alquiler >>>'
 END
 go
-IF OBJECT_ID('pago_venta') IS NOT NULL
+IF OBJECT_ID('TERCER_MALON.pago_venta') IS NOT NULL
 BEGIN
-    DROP TABLE pago_venta
+    drop table TERCER_MALON.pago_venta
     PRINT '<<< DROPPED TABLE pago_venta >>>'
 END
 go
-IF OBJECT_ID('periodo') IS NOT NULL
+IF OBJECT_ID('TERCER_MALON.periodo') IS NOT NULL
 BEGIN
-    DROP TABLE periodo
+    drop table TERCER_MALON.periodo
     PRINT '<<< DROPPED TABLE periodo >>>'
 END
 go
 -- JULI
-IF OBJECT_ID('propietario') IS NOT NULL
+IF OBJECT_ID('TERCER_MALON.propietario') IS NOT NULL
 BEGIN
-    DROP TABLE propietario
+    drop table TERCER_MALON.propietario
     PRINT '<<< DROPPED TABLE propietario >>>'
 END
 go
 -- AYLU
-IF OBJECT_ID('sucursal') IS NOT NULL
+IF OBJECT_ID('TERCER_MALON.sucursal') IS NOT NULL
 BEGIN
-    DROP TABLE sucursal
+    drop table TERCER_MALON.sucursal
     PRINT '<<< DROPPED TABLE sucursal >>>'
 END
 go
 -- JOHA
-IF OBJECT_ID('tipo_inmueble') IS NOT NULL
+IF OBJECT_ID('TERCER_MALON.tipo_inmueble') IS NOT NULL
 BEGIN
-    DROP TABLE tipo_inmueble
+    drop table TERCER_MALON.tipo_inmueble
     PRINT '<<< DROPPED TABLE tipo_inmueble >>>'
 END
 go
-IF OBJECT_ID('venta') IS NOT NULL
+IF OBJECT_ID('TERCER_MALON.venta') IS NOT NULL
 BEGIN
-    DROP TABLE venta
+    drop table TERCER_MALON.venta
     PRINT '<<< DROPPED TABLE venta >>>'
 END
 go
 -- JOHA
-IF OBJECT_ID('ambiente') IS NOT NULL
+IF OBJECT_ID('TERCER_MALON.ambiente') IS NOT NULL
 BEGIN
-    DROP TABLE ambiente
+    drop table TERCER_MALON.ambiente
     PRINT '<<< DROPPED TABLE ambiente >>>'
 END
 go
 -- AYLU
-IF OBJECT_ID('barrio') IS NOT NULL
+IF OBJECT_ID('TERCER_MALON.barrio') IS NOT NULL
 BEGIN
-    DROP TABLE barrio
+    drop table TERCER_MALON.barrio
     PRINT '<<< DROPPED TABLE barrio >>>'
 END
 go
 -- FACU
-IF OBJECT_ID('disposicion') IS NOT NULL
+IF OBJECT_ID('TERCER_MALON.disposicion') IS NOT NULL
 BEGIN
-    DROP TABLE disposicion
+    drop table TERCER_MALON.disposicion
     PRINT '<<< DROPPED TABLE disposicion >>>'
 END
 go
 -- FACU
-IF OBJECT_ID('estado_inmueble') IS NOT NULL
+IF OBJECT_ID('TERCER_MALON.estado_inmueble') IS NOT NULL
 BEGIN
-    DROP TABLE estado_inmueble
+    drop table TERCER_MALON.estado_inmueble
     PRINT '<<< DROPPED TABLE estado_inmueble >>>'
 END
 
 go
 -- AYLU
-IF OBJECT_ID('localidad') IS NOT NULL
+IF OBJECT_ID('TERCER_MALON.localidad') IS NOT NULL
 BEGIN
-    DROP TABLE localidad
+    drop table TERCER_MALON.localidad
     PRINT '<<< DROPPED TABLE localidad >>>'
 END
 go
 -- AYLU
-IF OBJECT_ID('provincia') IS NOT NULL
+IF OBJECT_ID('TERCER_MALON.provincia') IS NOT NULL
 BEGIN
-    DROP TABLE provincia
+    drop table TERCER_MALON.provincia
     PRINT '<<< DROPPED TABLE provincia >>>'
 END
 go
