@@ -758,7 +758,7 @@ GO
 CREATE PROCEDURE TERCER_MALON.MigrarOperacion
 AS
 	INSERT INTO TERCER_MALON.operacion
-		select SUBSTRING(ANUNCIO_TIPO_OPERACION, LEN('Tipo Operación')+2,30) from gd_esquema.Maestra
+		select SUBSTRING(ANUNCIO_TIPO_OPERACION, LEN('Tipo Operaciï¿½n')+2,30) from gd_esquema.Maestra
 		where ANUNCIO_TIPO_OPERACION is not null
 		group by ANUNCIO_TIPO_OPERACION
 		order by 1
@@ -942,7 +942,43 @@ BEGIN
 	JOIN TERCER_MALON.sucursal S ON S.cod_sucursal = M.SUCURSAL_CODIGO
 END
 GO
+CREATE PROCEDURE TERCER_MALON.MigrarCaracteristica
+AS
+BEGIN
+    INSERT INTO [GD2C2023].TERCER_MALON.caracteristica (nombre)
+    VALUES ('CABLE'),('WIFI'), ('GAS'), ('CALEFACCION');
+END
+GO
 
+CREATE PROCEDURE TERCER_MALON.MigrarOrientacion
+AS
+BEGIN
+    INSERT INTO [GD2C2023].TERCER_MALON.orientacion (tipo)
+    SELECT DISTINCT INMUEBLE_ORIENTACION
+    FROM [GD2C2023].[gd_esquema].[Maestra]
+    WHERE INMUEBLE_ORIENTACION IS NOT NULL;
+END
+GO
+
+CREATE PROCEDURE TERCER_MALON.MigrarDisposicion
+AS
+BEGIN
+    INSERT INTO [GD2C2023].TERCER_MALON.disposicion (tipo)
+    SELECT DISTINCT INMUEBLE_DISPOSICION
+    FROM [GD2C2023].[gd_esquema].[Maestra]
+    WHERE INMUEBLE_DISPOSICION IS NOT NULL;
+END
+GO
+
+CREATE PROCEDURE TERCER_MALON.MigrarAmbienteigrarEstadoImueble
+AS
+BEGIN
+    INSERT INTO [GD2C2023].TERCER_MALON.estado_inmueble (tipo)
+    SELECT DISTINCT INMUEBLE_ESTADO
+    FROM [GD2C2023].[gd_esquema].[Maestra]
+	    WHERE INMUEBLE_ESTADO IS NOT NULL;
+END
+GO
 
 --------------------------------------
 ---------- DATA MIGRATION ------------
@@ -960,4 +996,8 @@ BEGIN TRANSACTION
 	EXECUTE TERCER_MALON.MigrarEstadoAnuncio
 	EXECUTE TERCER_MALON.MigrarOperacion
 	EXECUTE TERCER_MALON.MigrarTipoInmueble
+    EXECUTE TERCER_MALON.MigrarDisposicion
+    EXECUTE TERCER_MALON.MigrarCaracteristica
+    EXECUTE TERCER_MALON.MigrarAmbienteigrarEstadoImueble
+    EXECUTE TERCER_MALON.MigrarOrientacion
 COMMIT TRANSACTION
