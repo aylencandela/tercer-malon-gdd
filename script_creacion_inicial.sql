@@ -980,6 +980,87 @@ BEGIN
 END
 GO
 
+---------------------------------------------
+IF EXISTS (SELECT * FROM sys.objects WHERE name = 'migrarPropietario')
+DROP PROCEDURE TERCER_MALON.migrarPropietario
+GO
+
+CREATE PROCEDURE TERCER_MALON.migrarPropietario AS
+BEGIN
+	INSERT INTO TERCER_MALON.propietario(
+		nombre,
+		apellido,
+		dni,
+		fecha_registro,
+		fecha_nacimiento,
+		telefono,
+		mail
+	)
+	SELECT DISTINCT
+		M.PROPIETARIO_NOMBRE,
+		M.PROPIETARIO_APELLIDO,
+		M.PROPIETARIO_DNI,
+		M.PROPIETARIO_FECHA_REGISTRO,
+		M.PROPIETARIO_FECHA_NAC,
+		M.PROPIETARIO_TELEFONO,
+		M.PROPIETARIO_MAIL
+	FROM gd_esquema.Maestra M
+END
+GO
+---------------------------------------------
+IF EXISTS (SELECT * FROM sys.objects WHERE name = 'migrarInquilino')
+DROP PROCEDURE TERCER_MALON.migrarInquilino
+GO
+
+CREATE PROCEDURE TERCER_MALON.migrarInquilino AS
+BEGIN
+	INSERT INTO TERCER_MALON.inquilino(
+		nombre,
+		apellido,
+		dni,
+		fecha_registro,
+		fecha_nacimiento,
+		telefono,
+		mail
+	)
+	SELECT DISTINCT
+		M.INQUILINO_NOMBRE,
+		M.INQUILINO_APELLIDO,
+		M.INQUILINO_DNI,
+		M.INQUILINO_FECHA_REGISTRO,
+		M.INQUILINO_FECHA_NAC,
+		M.INQUILINO_TELEFONO,
+		M.INQUILINO_MAIL
+	FROM gd_esquema.Maestra M
+END
+GO
+---------------------------------------------
+IF EXISTS (SELECT * FROM sys.objects WHERE name = 'migrarComprador')
+DROP PROCEDURE TERCER_MALON.migrarComprador
+GO
+
+CREATE PROCEDURE TERCER_MALON.migrarComprador AS
+BEGIN
+	INSERT INTO TERCER_MALON.comprador(
+		nombre,
+		apellido,
+		dni,
+		fecha_registro,
+		fecha_nacimiento,
+		telefono,
+		mail
+	)
+	SELECT DISTINCT
+		M.COMPRADOR_NOMBRE,
+		M.COMPRADOR_APELLIDO,
+		M.COMPRADOR_DNI,
+		M.COMPRADOR_FECHA_REGISTRO,
+		M.COMPRADOR_FECHA_NAC,
+		M.COMPRADOR_TELEFONO,
+		M.COMPRADOR_MAIL
+	FROM gd_esquema.Maestra M
+END
+GO
 --------------------------------------
 ---------- DATA MIGRATION ------------
 --------------------------------------
