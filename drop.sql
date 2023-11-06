@@ -1,10 +1,6 @@
 
 /*
- * ER/Studio Data Architect SQL Code Generation
- * Project :      tpder-model-bu.DM1
- *
- * Date Created : Monday, October 23, 2023 22:50:43
- * Target DBMS : Microsoft SQL Server 2019
+ * SCRIPT TO DROP ALL TABLES
  */
 
 USE GD2C2023
@@ -199,5 +195,87 @@ BEGIN
 END
 go
 
+IF EXISTS (SELECT * FROM sys.objects WHERE name = 'MigrarTipoInmueble')
+DROP PROCEDURE TERCER_MALON.MigrarTipoInmueble
+GO
+IF EXISTS (SELECT * FROM sys.objects WHERE name = 'MigrarMedioPago')
+DROP PROCEDURE TERCER_MALON.MigrarMedioPago
+GO
+IF EXISTS (SELECT * FROM sys.objects WHERE name = 'MigrarEstadoAnuncio')
+DROP PROCEDURE TERCER_MALON.MigrarEstadoAnuncio
+GO
+IF EXISTS (SELECT * FROM sys.objects WHERE name = 'MigrarEstadoAlquiler')
+DROP PROCEDURE TERCER_MALON.MigrarEstadoAlquiler
+GO
+IF EXISTS (SELECT * FROM sys.objects WHERE name = 'MigrarOperacion')
+DROP PROCEDURE TERCER_MALON.MigrarOperacion
+GO
+IF EXISTS (SELECT * FROM sys.objects WHERE name = 'MigrarAmbiente')
+DROP PROCEDURE TERCER_MALON.MigrarAmbiente
+GO
+IF EXISTS (SELECT * FROM sys.objects WHERE name = 'MigrarProvincia')
+DROP PROCEDURE TERCER_MALON.MigrarProvincia
+GO
+IF EXISTS (SELECT * FROM sys.objects WHERE name = 'MigrarLocalidad')
+DROP PROCEDURE TERCER_MALON.MigrarLocalidad
+GO
+IF EXISTS (SELECT * FROM sys.objects WHERE name = 'MigrarBarrio')
+DROP PROCEDURE TERCER_MALON.MigrarBarrio
+GO
+IF EXISTS (SELECT * FROM sys.objects WHERE name = 'MigrarSucursal')
+DROP PROCEDURE TERCER_MALON.MigrarSucursal
+GO
+IF EXISTS (SELECT * FROM sys.objects WHERE name = 'MigrarMoneda')
+DROP PROCEDURE TERCER_MALON.MigrarMoneda
+GO
+IF EXISTS (SELECT * FROM sys.objects WHERE name = 'MigrarAgente')
+DROP PROCEDURE TERCER_MALON.MigrarAgente
+GO
+
+IF EXISTS (SELECT * FROM sys.objects WHERE name = 'MigrarCaracteristica')
+DROP PROCEDURE TERCER_MALON.MigrarCaracteristica
+GO
+IF EXISTS (SELECT * FROM sys.objects WHERE name = 'MigrarOrientacion')
+DROP PROCEDURE TERCER_MALON.MigrarOrientacion
+GO
+IF EXISTS (SELECT * FROM sys.objects WHERE name = 'MigrarDisposicion')
+DROP PROCEDURE TERCER_MALON.MigrarDisposicion
+GO
+IF EXISTS (SELECT * FROM sys.objects WHERE name = 'MigrarEstadoInmueble')
+DROP PROCEDURE TERCER_MALON.MigrarEstadoInmueble
+GO
+IF EXISTS (SELECT * FROM sys.objects WHERE name = 'MigrarPeriodo')
+DROP PROCEDURE TERCER_MALON.MigrarPeriodo
+GO
+IF EXISTS (SELECT * FROM sys.objects WHERE name = 'MigrarInmueble')
+DROP PROCEDURE TERCER_MALON.MigrarInmueble
+GO
+IF EXISTS (SELECT * FROM sys.objects WHERE name = 'MigrarAnuncio')
+DROP PROCEDURE TERCER_MALON.MigrarAnuncio
+GO
+IF EXISTS (SELECT * FROM sys.objects WHERE name = 'MigrarAlquiler')
+DROP PROCEDURE TERCER_MALON.MigrarAlquiler
+GO
+IF EXISTS (SELECT * FROM sys.objects WHERE name = 'MigrarVenta')
+DROP PROCEDURE TERCER_MALON.MigrarVenta
+GO
+IF EXISTS (SELECT * FROM sys.objects WHERE name = 'MigrarPropietario')
+DROP PROCEDURE TERCER_MALON.MigrarPropietario
+GO
+IF EXISTS (SELECT * FROM sys.objects WHERE name = 'MigrarInquilino')
+DROP PROCEDURE TERCER_MALON.MigrarInquilino
+GO
+IF EXISTS (SELECT * FROM sys.objects WHERE name = 'MigrarComprador')
+DROP PROCEDURE TERCER_MALON.MigrarComprador
+GO
+IF EXISTS (SELECT * FROM sys.objects WHERE name = 'MigrarPagoAlquiler')
+DROP PROCEDURE TERCER_MALON.MigrarPagoAlquiler
+GO
+IF EXISTS (SELECT * FROM sys.objects WHERE name = 'MigrarDetalleAlquiler')
+DROP PROCEDURE TERCER_MALON.MigrarDetalleAlquiler
+GO
+IF EXISTS (SELECT * FROM sys.objects WHERE name = 'MigrarPagoVenta')
+DROP PROCEDURE TERCER_MALON.MigrarPagoVenta
+GO
 
 drop schema TERCER_MALON
