@@ -774,11 +774,11 @@ GO
 
 -------------------------------------------
 
-IF EXISTS (SELECT * FROM sys.objects WHERE name = 'migrarProvincia')
-DROP PROCEDURE TERCER_MALON.migrarProvincia
+IF EXISTS (SELECT * FROM sys.objects WHERE name = 'MigrarProvincia')
+DROP PROCEDURE TERCER_MALON.MigrarProvincia
 GO
 
-CREATE PROCEDURE TERCER_MALON.migrarProvincia AS
+CREATE PROCEDURE TERCER_MALON.MigrarProvincia AS
 BEGIN
 	INSERT INTO TERCER_MALON.provincia(
 		nombre
@@ -793,11 +793,11 @@ END
 GO
 -------------------------------------------------------
 
-IF EXISTS (SELECT * FROM sys.objects WHERE name = 'migrarLocalidad')
-DROP PROCEDURE TERCER_MALON.migrarLocalidad
+IF EXISTS (SELECT * FROM sys.objects WHERE name = 'MigrarLocalidad')
+DROP PROCEDURE TERCER_MALON.MigrarLocalidad
 GO
 
-CREATE PROCEDURE TERCER_MALON.migrarLocalidad AS
+CREATE PROCEDURE TERCER_MALON.MigrarLocalidad AS
 BEGIN
 	INSERT INTO TERCER_MALON.localidad (
 		nombre,
@@ -825,11 +825,11 @@ BEGIN
 END
 GO
 -------------------------------------------
-IF EXISTS (SELECT * FROM sys.objects WHERE name = 'migrarBarrio')
-DROP PROCEDURE TERCER_MALON.migrarBarrio
+IF EXISTS (SELECT * FROM sys.objects WHERE name = 'MigrarBarrio')
+DROP PROCEDURE TERCER_MALON.MigrarBarrio
 GO
 
-CREATE PROCEDURE TERCER_MALON.migrarBarrio AS
+CREATE PROCEDURE TERCER_MALON.MigrarBarrio AS
 BEGIN
 	INSERT INTO TERCER_MALON.barrio(
 		nombre,
@@ -846,11 +846,11 @@ BEGIN
 END
 GO
 ----------------------------------------------
-IF EXISTS (SELECT * FROM sys.objects WHERE name = 'migrarSucursal')
-DROP PROCEDURE TERCER_MALON.migrarSucursal
+IF EXISTS (SELECT * FROM sys.objects WHERE name = 'MigrarSucursal')
+DROP PROCEDURE TERCER_MALON.MigrarSucursal
 GO
 
-CREATE PROCEDURE TERCER_MALON.migrarSucursal AS
+CREATE PROCEDURE TERCER_MALON.MigrarSucursal AS
 BEGIN
 	INSERT INTO TERCER_MALON.sucursal(
 		cod_sucursal,
@@ -870,11 +870,11 @@ BEGIN
 END
 GO
 -------------------------------------------------
-IF EXISTS (SELECT * FROM sys.objects WHERE name = 'migrarMoneda')
-DROP PROCEDURE TERCER_MALON.migrarMoneda
+IF EXISTS (SELECT * FROM sys.objects WHERE name = 'MigrarMoneda')
+DROP PROCEDURE TERCER_MALON.MigrarMoneda
 GO
 
-CREATE PROCEDURE TERCER_MALON.migrarMoneda AS
+CREATE PROCEDURE TERCER_MALON.MigrarMoneda AS
 BEGIN
 	INSERT INTO TERCER_MALON.moneda(
 		nombre,
@@ -907,11 +907,11 @@ END
 GO
 
 ---------------------------------------------
-IF EXISTS (SELECT * FROM sys.objects WHERE name = 'migrarAgente')
-DROP PROCEDURE TERCER_MALON.migrarAgente
+IF EXISTS (SELECT * FROM sys.objects WHERE name = 'MigrarAgente')
+DROP PROCEDURE TERCER_MALON.MigrarAgente
 GO
 
-CREATE PROCEDURE TERCER_MALON.migrarAgente AS
+CREATE PROCEDURE TERCER_MALON.MigrarAgente AS
 BEGIN
 	INSERT INTO TERCER_MALON.agente(
 		nombre,
@@ -936,6 +936,8 @@ BEGIN
 	JOIN TERCER_MALON.sucursal S ON S.cod_sucursal = M.SUCURSAL_CODIGO
 END
 GO
+
+---------------------------------------------
 CREATE PROCEDURE TERCER_MALON.MigrarCaracteristica
 AS
 BEGIN
@@ -944,6 +946,7 @@ BEGIN
 END
 GO
 
+---------------------------------------------
 CREATE PROCEDURE TERCER_MALON.MigrarOrientacion
 AS
 BEGIN
@@ -973,6 +976,7 @@ BEGIN
 	    WHERE INMUEBLE_ESTADO IS NOT NULL;
 END
 GO
+
 CREATE PROCEDURE TERCER_MALON.MigrarAlquiler
 AS
 BEGIN
@@ -980,19 +984,20 @@ BEGIN
         cod_alquiler ,
         fecha_inicio ,
         fecha_fin ,
-        cant_periodos ,
         deposito ,
+		cant_periodos ,
         comision ,
         gastos_averig ,
-        cod_anuncio ,
         id_inquilino ,
-        id_estado_alquiler ,
+		cod_anuncio ,
+        id_estado_alquiler
     )
     SELECT 
         ALQUILER_CODIGO,
         ALQUILER_FECHA_INICIO,
         ALQUILER_FECHA_FIN,
         ALQUILER_DEPOSITO,
+		ALQUILER_CANT_PERIODOS,
         ALQUILER_COMISION,
         ALQUILER_GASTOS_AVERIGUA,
         (
@@ -1003,7 +1008,7 @@ BEGIN
         (   
             SELECT distinct cod_anuncio --PODRIA SIMPLEMENTE PONER EL CODIGO, PERO NO DEBERÍA ESCRBIR UN CODIGO QUE NO EXISTA EN LA BASE DE DATOS A MIGRADA.
                 FROM TERCER_MALON.ANUNCIO 
-            where TERCER_MALON.anuncio.codigo = [GD2C2023].[gd_esquema].[Maestra].ANUNCIO_CODIGO 
+            where TERCER_MALON.anuncio.cod_anuncio = [GD2C2023].[gd_esquema].[Maestra].ANUNCIO_CODIGO 
         ),
         (
             SELECT distinct id_estado_alquiler 
@@ -1042,17 +1047,15 @@ BEGIN
     [GD2C2023].[gd_esquema].[Maestra]
     where 
     VENTA_CODIGO is not null
-    
-
 END
 GO
 
 ---------------------------------------------
-IF EXISTS (SELECT * FROM sys.objects WHERE name = 'migrarPropietario')
-DROP PROCEDURE TERCER_MALON.migrarPropietario
+IF EXISTS (SELECT * FROM sys.objects WHERE name = 'MigrarPropietario')
+DROP PROCEDURE TERCER_MALON.MigrarPropietario
 GO
 
-CREATE PROCEDURE TERCER_MALON.migrarPropietario AS
+CREATE PROCEDURE TERCER_MALON.MigrarPropietario AS
 BEGIN
 	INSERT INTO TERCER_MALON.propietario(
 		nombre,
@@ -1072,14 +1075,15 @@ BEGIN
 		M.PROPIETARIO_TELEFONO,
 		M.PROPIETARIO_MAIL
 	FROM gd_esquema.Maestra M
+	WHERE M.PROPIETARIO_DNI IS NOT NULL
 END
 GO
 ---------------------------------------------
-IF EXISTS (SELECT * FROM sys.objects WHERE name = 'migrarInquilino')
-DROP PROCEDURE TERCER_MALON.migrarInquilino
+IF EXISTS (SELECT * FROM sys.objects WHERE name = 'MigrarInquilino')
+DROP PROCEDURE TERCER_MALON.MigrarInquilino
 GO
 
-CREATE PROCEDURE TERCER_MALON.migrarInquilino AS
+CREATE PROCEDURE TERCER_MALON.MigrarInquilino AS
 BEGIN
 	INSERT INTO TERCER_MALON.inquilino(
 		nombre,
@@ -1099,14 +1103,15 @@ BEGIN
 		M.INQUILINO_TELEFONO,
 		M.INQUILINO_MAIL
 	FROM gd_esquema.Maestra M
+	WHERE M.INQUILINO_DNI IS NOT NULL
 END
 GO
 ---------------------------------------------
-IF EXISTS (SELECT * FROM sys.objects WHERE name = 'migrarComprador')
-DROP PROCEDURE TERCER_MALON.migrarComprador
+IF EXISTS (SELECT * FROM sys.objects WHERE name = 'MigrarComprador')
+DROP PROCEDURE TERCER_MALON.MigrarComprador
 GO
 
-CREATE PROCEDURE TERCER_MALON.migrarComprador AS
+CREATE PROCEDURE TERCER_MALON.MigrarComprador AS
 BEGIN
 	INSERT INTO TERCER_MALON.comprador(
 		nombre,
@@ -1126,6 +1131,7 @@ BEGIN
 		M.COMPRADOR_TELEFONO,
 		M.COMPRADOR_MAIL
 	FROM gd_esquema.Maestra M
+	WHERE M.COMPRADOR_DNI IS NOT NULL
 END
 GO
 --------------------------------------
@@ -1133,13 +1139,17 @@ GO
 --------------------------------------
 
 BEGIN TRANSACTION 
-	EXECUTE TERCER_MALON.migrarProvincia
-	EXECUTE TERCER_MALON.migrarLocalidad
-	EXECUTE TERCER_MALON.migrarBarrio
-	EXECUTE TERCER_MALON.migrarSucursal
-	EXECUTE TERCER_MALON.migrarAgente
+	EXECUTE TERCER_MALON.MigrarProvincia
+	EXECUTE TERCER_MALON.MigrarLocalidad
+	EXECUTE TERCER_MALON.MigrarBarrio
+	EXECUTE TERCER_MALON.MigrarSucursal
+	EXECUTE TERCER_MALON.MigrarAgente
+	EXECUTE TERCER_MALON.MigrarComprador
+	EXECUTE TERCER_MALON.MigrarInquilino
+	EXECUTE TERCER_MALON.MigrarPropietario
 	EXECUTE TERCER_MALON.MigrarAmbiente
 	EXECUTE TERCER_MALON.MigrarMedioPago
+	EXECUTE TERCER_MALON.MigrarMoneda
 	EXECUTE TERCER_MALON.MigrarEstadoAlquiler
 	EXECUTE TERCER_MALON.MigrarEstadoAnuncio
 	EXECUTE TERCER_MALON.MigrarOperacion
@@ -1148,187 +1158,7 @@ BEGIN TRANSACTION
     EXECUTE TERCER_MALON.MigrarCaracteristica
     EXECUTE TERCER_MALON.MigrarEstadoInmueble
     EXECUTE TERCER_MALON.MigrarOrientacion
-    EXECUTE TERCER_MALON.MigrarAlquiler
-    EXECUTE TERCER_MALON.MigrarAlquiler
+	--EXECUTE TERCER_MALON.MigrarInmueble
+    --EXECUTE TERCER_MALON.MigrarAlquiler
+	--EXECUTE TERCER_MALON.MigrarVenta
 COMMIT TRANSACTION
-
-USE GD2C2023
-GO
-IF OBJECT_ID('TERCER_MALON.alquiler') IS NOT NULL
-BEGIN
-    drop table TERCER_MALON.alquiler
-    PRINT '<<< DROPPED TABLE alquiler >>>'
-END
-
-go
-IF OBJECT_ID('TERCER_MALON.anuncio') IS NOT NULL
-BEGIN
-    drop table TERCER_MALON.anuncio
-    PRINT '<<< DROPPED TABLE anuncio >>>'
-END
-go
-IF OBJECT_ID('TERCER_MALON.agente') IS NOT NULL
-BEGIN
-    drop table TERCER_MALON.agente
-    PRINT '<<< DROPPED TABLE agente >>>'
-END
-go
-
-IF OBJECT_ID('TERCER_MALON.caracteristica') IS NOT NULL
-BEGIN
-    drop table TERCER_MALON.caracteristica
-    PRINT '<<< DROPPED TABLE caracteristica >>>'
-END
-go
-IF OBJECT_ID('TERCER_MALON.caracteristica_x_inmueble') IS NOT NULL
-BEGIN
-    drop table TERCER_MALON.caracteristica_x_inmueble
-    PRINT '<<< DROPPED TABLE caracteristica_x_inmueble >>>'
-END
-go
-IF OBJECT_ID('TERCER_MALON.comprador') IS NOT NULL
-BEGIN
-    drop table TERCER_MALON.comprador
-    PRINT '<<< DROPPED TABLE comprador >>>'
-END
-go
-IF OBJECT_ID('TERCER_MALON.detalle_alquiler') IS NOT NULL
-BEGIN
-    drop table TERCER_MALON.detalle_alquiler
-    PRINT '<<< DROPPED TABLE detalle_alquiler >>>'
-END
-go
-
-IF OBJECT_ID('TERCER_MALON.estado_alquiler') IS NOT NULL
-BEGIN
-    drop table TERCER_MALON.estado_alquiler
-    PRINT '<<< DROPPED TABLE estado_alquiler >>>'
-END
-go
-
-IF OBJECT_ID('TERCER_MALON.estado_anuncio') IS NOT NULL
-BEGIN
-    drop table TERCER_MALON.estado_anuncio
-    PRINT '<<< DROPPED TABLE estado_anuncio >>>'
-END
-go
-IF OBJECT_ID('TERCER_MALON.inmueble') IS NOT NULL
-BEGIN
-    drop table TERCER_MALON.inmueble
-    PRINT '<<< DROPPED TABLE inmueble >>>'
-END
-go
-IF OBJECT_ID('TERCER_MALON.inquilino') IS NOT NULL
-BEGIN
-    drop table TERCER_MALON.inquilino
-    PRINT '<<< DROPPED TABLE inquilino >>>'
-END
-go
-IF OBJECT_ID('TERCER_MALON.medio_pago') IS NOT NULL
-BEGIN
-    drop table TERCER_MALON.medio_pago
-    PRINT '<<< DROPPED TABLE medio_pago >>>'
-END
-go
-IF OBJECT_ID('TERCER_MALON.moneda') IS NOT NULL 
-BEGIN
-    drop table TERCER_MALON.moneda
-    PRINT '<<< DROPPED TABLE moneda >>>'
-END
-go
-IF OBJECT_ID('TERCER_MALON.operacion') IS NOT NULL
-BEGIN
-    drop table TERCER_MALON.operacion
-    PRINT '<<< DROPPED TABLE operacion >>>'
-END
-go
-IF OBJECT_ID('TERCER_MALON.orientacion') IS NOT NULL 
-BEGIN
-    drop table TERCER_MALON.orientacion
-    PRINT '<<< DROPPED TABLE orientacion >>>'
-END
-go
-IF OBJECT_ID('TERCER_MALON.pago_alquiler') IS NOT NULL
-BEGIN
-    drop table TERCER_MALON.pago_alquiler
-    PRINT '<<< DROPPED TABLE pago_alquiler >>>'
-END
-go
-IF OBJECT_ID('TERCER_MALON.pago_venta') IS NOT NULL
-BEGIN
-    drop table TERCER_MALON.pago_venta
-    PRINT '<<< DROPPED TABLE pago_venta >>>'
-END
-go
-IF OBJECT_ID('TERCER_MALON.periodo') IS NOT NULL
-BEGIN
-    drop table TERCER_MALON.periodo
-    PRINT '<<< DROPPED TABLE periodo >>>'
-END
-go
-IF OBJECT_ID('TERCER_MALON.propietario') IS NOT NULL
-BEGIN
-    drop table TERCER_MALON.propietario
-    PRINT '<<< DROPPED TABLE propietario >>>'
-END
-go
-
-IF OBJECT_ID('TERCER_MALON.sucursal') IS NOT NULL
-BEGIN
-    drop table TERCER_MALON.sucursal
-    PRINT '<<< DROPPED TABLE sucursal >>>'
-END
-go
-
-IF OBJECT_ID('TERCER_MALON.tipo_inmueble') IS NOT NULL
-BEGIN
-    drop table TERCER_MALON.tipo_inmueble
-    PRINT '<<< DROPPED TABLE tipo_inmueble >>>'
-END
-go
-IF OBJECT_ID('TERCER_MALON.venta') IS NOT NULL
-BEGIN
-    drop table TERCER_MALON.venta
-    PRINT '<<< DROPPED TABLE venta >>>'
-END
-go
-IF OBJECT_ID('TERCER_MALON.ambiente') IS NOT NULL
-BEGIN
-    drop table TERCER_MALON.ambiente
-    PRINT '<<< DROPPED TABLE ambiente >>>'
-END
-go
-IF OBJECT_ID('TERCER_MALON.barrio') IS NOT NULL
-BEGIN
-    drop table TERCER_MALON.barrio
-    PRINT '<<< DROPPED TABLE barrio >>>'
-END
-go
-IF OBJECT_ID('TERCER_MALON.disposicion') IS NOT NULL
-BEGIN
-    drop table TERCER_MALON.disposicion
-    PRINT '<<< DROPPED TABLE disposicion >>>'
-END
-go
-IF OBJECT_ID('TERCER_MALON.estado_inmueble') IS NOT NULL
-BEGIN
-    drop table TERCER_MALON.estado_inmueble
-    PRINT '<<< DROPPED TABLE estado_inmueble >>>'
-END
-
-go
-IF OBJECT_ID('TERCER_MALON.localidad') IS NOT NULL
-BEGIN
-    drop table TERCER_MALON.localidad
-    PRINT '<<< DROPPED TABLE localidad >>>'
-END
-go
-IF OBJECT_ID('TERCER_MALON.provincia') IS NOT NULL
-BEGIN
-    drop table TERCER_MALON.provincia
-    PRINT '<<< DROPPED TABLE provincia >>>'
-END
-go
-
-
-drop schema TERCER_MALON
