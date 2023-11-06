@@ -1211,6 +1211,55 @@ BEGIN
 	WHERE M.COMPRADOR_DNI IS NOT NULL
 END
 GO
+
+CREATE PROCEDURE TERCER_MALON.MigrarPagoAlquiler
+AS
+BEGIN
+	INSERT INTO [TERCER_MALON].[pago_alquiler]
+           ([cod_pago_alquiler]
+           ,[fecha]
+           ,[nro_periodo]
+           ,[descripcion_periodo]
+           ,[fecha_inicio_periodo]
+           ,[fecha_fin_periodo]
+           ,[importe]
+           ,[id_medio_pago]
+           ,[cod_alquiler])
+    SELECT DISTINCT
+		M.PAGO_ALQUILER_CODIGO,
+		M.PAGO_ALQUILER_FECHA,
+		M.PAGO_ALQUILER_NRO_PERIODO,
+		M.PAGO_ALQUILER_DESC,
+		M.PAGO_ALQUILER_FEC_INI,
+		M.PAGO_ALQUILER_FEC_FIN,
+		M.PAGO_ALQUILER_IMPORTE,
+		(SELECT id_medio_pago FROM TERCER_MALON.medio_pago WHERE nombre=M.PAGO_ALQUILER_MEDIO_PAGO) AS id_medio_pago,
+		(SELECT cod_alquiler FROM TERCER_MALON.alquiler WHERE cod_alquiler=M.ALQUILER_CODIGO) AS cod_alquiler
+	FROM gd_esquema.Maestra M
+	WHERE M.PAGO_ALQUILER_CODIGO IS NOT NULL
+END
+GO
+
+CREATE PROCEDURE TERCER_MALON.MigrarPagoVenta
+AS
+BEGIN
+	INSERT INTO [TERCER_MALON].[pago_venta]
+           ([importe]
+           ,[cotizacion_actual]
+           ,[cod_venta]
+           ,[id_medio_pago]
+           ,[id_moneda])  
+    SELECT
+		M.PAGO_VENTA_IMPORTE,
+		M.PAGO_VENTA_COTIZACION,
+		(SELECT cod_venta FROM TERCER_MALON.venta WHERE cod_venta=M.VENTA_CODIGO) AS cod_venta,
+		(SELECT id_medio_pago FROM TERCER_MALON.medio_pago WHERE nombre=M.PAGO_VENTA_MEDIO_PAGO) AS id_medio_pago,
+		(SELECT id_moneda FROM TERCER_MALON.moneda WHERE nombre=M.PAGO_VENTA_MONEDA) AS moneda
+	FROM gd_esquema.Maestra M
+	WHERE M.VENTA_CODIGO IS NOT NULL
+	ORDER BY M.VENTA_CODIGO
+END
+GO
 --------------------------------------
 ---------- DATA MIGRATION ------------
 --------------------------------------
@@ -1239,5 +1288,7 @@ BEGIN TRANSACTION
 	EXECUTE TERCER_MALON.MigrarInmueble
 	EXECUTE TERCER_MALON.MigrarAnuncio
     EXECUTE TERCER_MALON.MigrarAlquiler
+	EXECUTE TERCER_MALON.MigrarPagoAlquiler
 	EXECUTE TERCER_MALON.MigrarVenta
+	EXECUTE TERCER_MALON.MigrarPagoVenta
 COMMIT TRANSACTION
