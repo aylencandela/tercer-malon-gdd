@@ -977,6 +977,34 @@ BEGIN
 END
 GO
 
+CREATE PROCEDURE TERCER_MALON.MigrarInmueble
+AS
+BEGIN
+	INSERT INTO TERCER_MALON.inmueble
+	SELECT distinct
+		M.INMUEBLE_CODIGO,
+		M.INMUEBLE_ANTIGUEDAD,
+		M.INMUEBLE_DESCRIPCION,
+		M.INMUEBLE_DIRECCION,
+		M.INMUEBLE_SUPERFICIETOTAL,
+		M.INMUEBLE_EXPESAS,
+		M.INMUEBLE_NOMBRE,
+		(SELECT id_tipo_inmueble FROM TERCER_MALON.tipo_inmueble WHERE tipo=M.INMUEBLE_TIPO_INMUEBLE) AS tipo_inmueble,
+		(SELECT id_estado_inm FROM TERCER_MALON.estado_inmueble WHERE tipo=M.INMUEBLE_ESTADO) AS estado_inmueble,
+		(SELECT id_disposicion FROM TERCER_MALON.disposicion WHERE tipo=M.INMUEBLE_DISPOSICION) AS disposicion,
+		(SELECT id_ambiente FROM TERCER_MALON.ambiente WHERE tipo=M.INMUEBLE_CANT_AMBIENTES) AS ambiente,
+		(SELECT id_orientacion FROM TERCER_MALON.orientacion WHERE tipo=M.INMUEBLE_ORIENTACION) AS orientacion,
+		(SELECT id_barrio FROM TERCER_MALON.barrio 
+			JOIN TERCER_MALON.localidad ON barrio.id_localidad = localidad.id_localidad
+			JOIN TERCER_MALON.provincia ON provincia.id_provincia = localidad.id_provincia
+			WHERE barrio.nombre=M.INMUEBLE_BARRIO AND localidad.nombre=M.INMUEBLE_LOCALIDAD AND provincia.nombre=INMUEBLE_PROVINCIA) AS barrio,
+		(SELECT id_propietario FROM TERCER_MALON.propietario WHERE nombre=M.PROPIETARIO_NOMBRE AND dni=PROPIETARIO_DNI) AS propietario
+	FROM gd_esquema.Maestra M
+	WHERE M.INMUEBLE_CODIGO IS NOT NULL
+	order by 1
+END
+GO
+
 CREATE PROCEDURE TERCER_MALON.MigrarAlquiler
 AS
 BEGIN
@@ -1158,7 +1186,7 @@ BEGIN TRANSACTION
     EXECUTE TERCER_MALON.MigrarCaracteristica
     EXECUTE TERCER_MALON.MigrarEstadoInmueble
     EXECUTE TERCER_MALON.MigrarOrientacion
-	--EXECUTE TERCER_MALON.MigrarInmueble
+	EXECUTE TERCER_MALON.MigrarInmueble
     --EXECUTE TERCER_MALON.MigrarAlquiler
 	--EXECUTE TERCER_MALON.MigrarVenta
 COMMIT TRANSACTION
