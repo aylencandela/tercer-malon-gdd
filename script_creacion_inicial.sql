@@ -977,6 +977,16 @@ BEGIN
 END
 GO
 
+CREATE PROCEDURE TERCER_MALON.MigrarPeriodo
+AS
+BEGIN
+    INSERT INTO TERCER_MALON.periodo(tipo)
+    SELECT DISTINCT M.ANUNCIO_TIPO_PERIODO
+	FROM gd_esquema.Maestra M
+    WHERE M.ANUNCIO_TIPO_PERIODO IS NOT NULL;
+END
+GO
+
 CREATE PROCEDURE TERCER_MALON.MigrarInmueble
 AS
 BEGIN
@@ -998,9 +1008,42 @@ BEGIN
 			JOIN TERCER_MALON.localidad ON barrio.id_localidad = localidad.id_localidad
 			JOIN TERCER_MALON.provincia ON provincia.id_provincia = localidad.id_provincia
 			WHERE barrio.nombre=M.INMUEBLE_BARRIO AND localidad.nombre=M.INMUEBLE_LOCALIDAD AND provincia.nombre=INMUEBLE_PROVINCIA) AS barrio,
-		(SELECT id_propietario FROM TERCER_MALON.propietario WHERE nombre=M.PROPIETARIO_NOMBRE AND dni=PROPIETARIO_DNI) AS propietario
+		(SELECT id_propietario FROM TERCER_MALON.propietario WHERE nombre=M.PROPIETARIO_NOMBRE AND dni=M.PROPIETARIO_DNI) AS propietario
 	FROM gd_esquema.Maestra M
 	WHERE M.INMUEBLE_CODIGO IS NOT NULL
+	order by 1
+END
+GO
+
+CREATE PROCEDURE TERCER_MALON.MigrarAnuncio
+AS
+BEGIN
+	INSERT INTO [TERCER_MALON].[anuncio]
+           ([cod_anuncio]
+           ,[precio_publicado]
+           ,[fecha_publicacion]
+           ,[fecha_fin]
+           ,[costo_anuncio]
+           ,[id_operacion]
+           ,[id_periodo]
+           ,[id_estado_anuncio]
+           ,[id_moneda]
+           ,[cod_inmueble]
+           ,[id_agente])
+	SELECT distinct
+		M.ANUNCIO_CODIGO,
+		M.ANUNCIO_PRECIO_PUBLICADO,
+		M.ANUNCIO_FECHA_PUBLICACION,
+		M.ANUNCIO_FECHA_FINALIZACION,
+		M.ANUNCIO_COSTO_ANUNCIO,
+		(SELECT id_operacion FROM TERCER_MALON.operacion WHERE tipo=SUBSTRING(M.ANUNCIO_TIPO_OPERACION, LEN('Tipo Operacion')+2,30)) AS operacion,
+		(SELECT id_periodo FROM TERCER_MALON.periodo WHERE tipo=M.ANUNCIO_TIPO_PERIODO) AS periodo,
+		(SELECT id_estado_anuncio FROM TERCER_MALON.estado_anuncio WHERE tipo=M.ANUNCIO_ESTADO) AS estado_anuncio,
+		(SELECT id_moneda FROM TERCER_MALON.moneda WHERE nombre=M.ANUNCIO_MONEDA) AS moneda,
+		(SELECT cod_inmueble FROM TERCER_MALON.inmueble WHERE cod_inmueble=M.INMUEBLE_CODIGO) AS inmueble,
+		(SELECT id_agente FROM TERCER_MALON.agente WHERE nombre=M.AGENTE_NOMBRE AND dni=M.AGENTE_DNI) AS agente
+	FROM gd_esquema.Maestra M
+	WHERE M.ANUNCIO_CODIGO IS NOT NULL AND M.INMUEBLE_CODIGO IS NOT NULL
 	order by 1
 END
 GO
@@ -1181,12 +1224,14 @@ BEGIN TRANSACTION
 	EXECUTE TERCER_MALON.MigrarEstadoAlquiler
 	EXECUTE TERCER_MALON.MigrarEstadoAnuncio
 	EXECUTE TERCER_MALON.MigrarOperacion
+	EXECUTE TERCER_MALON.MigrarPeriodo
 	EXECUTE TERCER_MALON.MigrarTipoInmueble
     EXECUTE TERCER_MALON.MigrarDisposicion
     EXECUTE TERCER_MALON.MigrarCaracteristica
     EXECUTE TERCER_MALON.MigrarEstadoInmueble
     EXECUTE TERCER_MALON.MigrarOrientacion
 	EXECUTE TERCER_MALON.MigrarInmueble
+	EXECUTE TERCER_MALON.MigrarAnuncio
     --EXECUTE TERCER_MALON.MigrarAlquiler
 	--EXECUTE TERCER_MALON.MigrarVenta
 COMMIT TRANSACTION
