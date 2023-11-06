@@ -1048,10 +1048,13 @@ BEGIN
 END
 GO
 
+IF EXISTS (SELECT * FROM sys.objects WHERE name = 'MigrarAlquiler')
+DROP PROCEDURE TERCER_MALON.MigrarAlquiler
+GO
 CREATE PROCEDURE TERCER_MALON.MigrarAlquiler
 AS
 BEGIN
-    INSERT INTO GD2C2023.TERCER_MALON.alquiler (
+    INSERT INTO TERCER_MALON.alquiler (
         cod_alquiler ,
         fecha_inicio ,
         fecha_fin ,
@@ -1063,7 +1066,7 @@ BEGIN
 		cod_anuncio ,
         id_estado_alquiler
     )
-    SELECT 
+    SELECT DISTINCT
         ALQUILER_CODIGO,
         ALQUILER_FECHA_INICIO,
         ALQUILER_FECHA_FIN,
@@ -1072,17 +1075,16 @@ BEGIN
         ALQUILER_COMISION,
         ALQUILER_GASTOS_AVERIGUA,
         (
-            SELECT distinct id_inquilino 
-                from TERCER_MALON.inquilino 
+            SELECT id_inquilino from TERCER_MALON.inquilino 
             where TERCER_MALON.inquilino.nombre = INQUILINO_NOMBRE AND TERCER_MALON.inquilino.dni = INQUILINO_DNI
         ),
         (   
-            SELECT distinct cod_anuncio --PODRIA SIMPLEMENTE PONER EL CODIGO, PERO NO DEBERÍA ESCRBIR UN CODIGO QUE NO EXISTA EN LA BASE DE DATOS A MIGRADA.
+            SELECT cod_anuncio --PODRIA SIMPLEMENTE PONER EL CODIGO, PERO NO DEBERÍA ESCRBIR UN CODIGO QUE NO EXISTA EN LA BASE DE DATOS A MIGRADA.
                 FROM TERCER_MALON.ANUNCIO 
             where TERCER_MALON.anuncio.cod_anuncio = [GD2C2023].[gd_esquema].[Maestra].ANUNCIO_CODIGO 
         ),
         (
-            SELECT distinct id_estado_alquiler 
+            SELECT id_estado_alquiler 
                 FROM [GD2C2023].[TERCER_MALON].estado_alquiler 
             where tipo = [GD2C2023].[gd_esquema].[Maestra].ALQUILER_ESTADO
         )
@@ -1094,30 +1096,34 @@ GO
 CREATE PROCEDURE TERCER_MALON.MigrarVenta
 AS
 BEGIN
-    SELECT 
-        cod_venta,
-        fecha,
-        precio,
-        comision,
+	INSERT INTO [TERCER_MALON].[venta]
+           ([cod_venta]
+           ,[fecha]
+           ,[precio]
+           ,[comision]
+           ,[cod_anuncio]
+           ,[id_comprador]
+           ,[id_moneda])
+	SELECT DISTINCT
+        M.VENTA_CODIGO,
+        M.VENTA_FECHA,
+        M.VENTA_PRECIO_VENTA,
+        M.VENTA_COMISION,
         (   
-            SELECT distinct cod_anuncio --PODRIA SIMPLEMENTE PONER EL CODIGO, PERO NO DEBERÍA ESCRBIR UN CODIGO QUE NO EXISTA EN LA BASE DE DATOS A MIGRADA.
-                FROM TERCER_MALON.ANUNCIO 
-            where TERCER_MALON.anuncio.codigo = [GD2C2023].[gd_esquema].[Maestra].ANUNCIO_CODIGO 
-        ),
+            SELECT cod_anuncio --PODRIA SIMPLEMENTE PONER EL CODIGO, PERO NO DEBERÍA ESCRBIR UN CODIGO QUE NO EXISTA EN LA BASE DE DATOS A MIGRADA. t
+            FROM TERCER_MALON.anuncio 
+            WHERE cod_anuncio = M.ANUNCIO_CODIGO 
+        ) AS cod_anuncio,
         (
-            SELECT id_comprador
-                from TERCER_MALON.comprador 
-            where TERCER_MALON.comprador.nombre = COMPRADOR_NOMBRE AND TERCER_MALON.comprador.dni = COMPRADOR_DNI
-        ),
+            SELECT id_comprador FROM TERCER_MALON.comprador 
+            WHERE TERCER_MALON.comprador.nombre = M.COMPRADOR_NOMBRE AND TERCER_MALON.comprador.dni = M.COMPRADOR_DNI
+        ) AS id_comprador,
         (
-            SELECT id_moneda
-                from TERCER_MALON.moneda 
-            WHERE TERCER_MALON.moneda.nombre = VENTA_MONEDA 
-        )
-    FROM
-    [GD2C2023].[gd_esquema].[Maestra]
-    where 
-    VENTA_CODIGO is not null
+            SELECT id_moneda FROM TERCER_MALON.moneda 
+            WHERE TERCER_MALON.moneda.nombre = M.VENTA_MONEDA 
+        ) AS id_moneda
+    FROM gd_esquema.Maestra M
+    WHERE VENTA_CODIGO is not null
 END
 GO
 
@@ -1232,6 +1238,6 @@ BEGIN TRANSACTION
     EXECUTE TERCER_MALON.MigrarOrientacion
 	EXECUTE TERCER_MALON.MigrarInmueble
 	EXECUTE TERCER_MALON.MigrarAnuncio
-    --EXECUTE TERCER_MALON.MigrarAlquiler
-	--EXECUTE TERCER_MALON.MigrarVenta
+    EXECUTE TERCER_MALON.MigrarAlquiler
+	EXECUTE TERCER_MALON.MigrarVenta
 COMMIT TRANSACTION
