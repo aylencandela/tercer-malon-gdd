@@ -752,7 +752,7 @@ GO
 CREATE PROCEDURE TERCER_MALON.MigrarOperacion
 AS
 	INSERT INTO TERCER_MALON.operacion
-		select SUBSTRING(ANUNCIO_TIPO_OPERACION, LEN('Tipo Operaci�n')+2,30) from gd_esquema.Maestra
+		select SUBSTRING(ANUNCIO_TIPO_OPERACION, LEN('Tipo Operacion')+2,30) from gd_esquema.Maestra
 		where ANUNCIO_TIPO_OPERACION is not null
 		group by ANUNCIO_TIPO_OPERACION
 		order by 1
