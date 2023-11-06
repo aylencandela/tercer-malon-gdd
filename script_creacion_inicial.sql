@@ -1240,6 +1240,26 @@ BEGIN
 END
 GO
 
+CREATE PROCEDURE TERCER_MALON.MigrarDetalleAlquiler
+AS
+BEGIN
+	
+	INSERT INTO [TERCER_MALON].[detalle_alquiler]
+           ([periodo_inicio]
+           ,[periodo_fin]
+           ,[precio]
+           ,[cod_alquiler])
+    SELECT DISTINCT
+		M.DETALLE_ALQ_NRO_PERIODO_INI,
+		M.DETALLE_ALQ_NRO_PERIODO_FIN,
+		M.DETALLE_ALQ_PRECIO,
+		(SELECT cod_alquiler FROM TERCER_MALON.alquiler WHERE cod_alquiler=M.ALQUILER_CODIGO) AS cod_alquiler
+	FROM gd_esquema.Maestra M
+	WHERE M.ALQUILER_CODIGO IS NOT NULL AND M.DETALLE_ALQ_NRO_PERIODO_INI IS NOT NULL
+	ORDER BY cod_alquiler
+END
+GO
+
 CREATE PROCEDURE TERCER_MALON.MigrarPagoVenta
 AS
 BEGIN
@@ -1249,7 +1269,7 @@ BEGIN
            ,[cod_venta]
            ,[id_medio_pago]
            ,[id_moneda])  
-    SELECT
+    SELECT DISTINCT
 		M.PAGO_VENTA_IMPORTE,
 		M.PAGO_VENTA_COTIZACION,
 		(SELECT cod_venta FROM TERCER_MALON.venta WHERE cod_venta=M.VENTA_CODIGO) AS cod_venta,
@@ -1257,7 +1277,7 @@ BEGIN
 		(SELECT id_moneda FROM TERCER_MALON.moneda WHERE nombre=M.PAGO_VENTA_MONEDA) AS moneda
 	FROM gd_esquema.Maestra M
 	WHERE M.VENTA_CODIGO IS NOT NULL
-	ORDER BY M.VENTA_CODIGO
+	ORDER BY cod_venta
 END
 GO
 --------------------------------------
@@ -1291,4 +1311,5 @@ BEGIN TRANSACTION
 	EXECUTE TERCER_MALON.MigrarPagoAlquiler
 	EXECUTE TERCER_MALON.MigrarVenta
 	EXECUTE TERCER_MALON.MigrarPagoVenta
+	EXECUTE TERCER_MALON.MigrarDetalleAlquiler
 COMMIT TRANSACTION
