@@ -235,6 +235,9 @@ GO
 IF EXISTS (SELECT * FROM sys.objects WHERE name = 'MigrarCaracteristica')
 DROP PROCEDURE TERCER_MALON.MigrarCaracteristica
 GO
+IF EXISTS (SELECT * FROM sys.objects WHERE name = 'MigrarCaracteristicaXInmueble')
+DROP PROCEDURE TERCER_MALON.MigrarCaracteristicaXInmueble
+GO
 IF EXISTS (SELECT * FROM sys.objects WHERE name = 'MigrarOrientacion')
 DROP PROCEDURE TERCER_MALON.MigrarOrientacion
 GO
