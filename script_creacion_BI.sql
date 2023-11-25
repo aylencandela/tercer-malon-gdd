@@ -108,33 +108,12 @@ CREATE TABLE TERCER_MALON.BI_ubicacion_barrio (
 GO
 
 -- -----------------------------------------------------
--- Table TERCER_MALON.BI_agente
+-- Table TERCER_MALON.BI_ubicacion_barrio
 -- -----------------------------------------------------
-CREATE TABLE TERCER_MALON.BI_agente (
-	id_agente numeric(18, 0) NOT NULL,
-	nombre nvarchar(100) NOT NULL,
-	apellido nvarchar(10) NOT NULL,
-	dni numeric(18, 0) NOT NULL,
-	fecha_registro datetime NOT NULL,
-	fecha_nacimiento datetime NOT NULL,
-	id_rango_etario NUMERIC(18,0) NOT NULL,
-	id_sucursal numeric(18, 0) NOT NULL,
-	CONSTRAINT PK_BI_agente PRIMARY KEY (id_agente),
-	CONSTRAINT FK_BI_sucursal_BI_agente FOREIGN KEY(id_sucursal) REFERENCES TERCER_MALON.BI_sucursal (id_sucursal));
-GO
-
--- -----------------------------------------------------
--- Table TERCER_MALON.BI_inquilino
--- -----------------------------------------------------
-CREATE TABLE TERCER_MALON.BI_inquilino (
-	id_inquilino numeric(18, 0) NOT NULL,
-	nombre nvarchar(100) NOT NULL,
-	apellido nvarchar(10) NOT NULL,
-	dni numeric(18, 0) NOT NULL,
-	fecha_registro datetime NOT NULL,
-	fecha_nacimiento datetime NOT NULL,
-	id_rango_etario NUMERIC(18,0) NOT NULL,
-	CONSTRAINT PK_BI_inquilino PRIMARY KEY (id_inquilino));
+CREATE TABLE TERCER_MALON.BI_estado_alquiler (
+  id_estado_alquiler NUMERIC(18,0) NOT NULL,
+  tipo NVARCHAR(100) NOT NULL,
+  CONSTRAINT PK_id_estado_alquiler PRIMARY KEY (id_estado_alquiler));
 GO
 
 -- -----------------------------------------------------
@@ -166,14 +145,48 @@ GO
 CREATE TABLE TERCER_MALON.BI_fact_alquiler (
   id_alquiler NUMERIC(18,0) NOT NULL,
   id_barrio NUMERIC(18,0) NOT NULL,
-  id_tiempo NUMERIC(18,0) NOT NULL, -- segun fecha_inicio O fecha_fin_periodo
+  id_tiempo NUMERIC(18,0) NOT NULL, -- segun fecha_inicio = alta alquiler
   id_rango_etario_inq NUMERIC(18,0) NOT NULL,
   fecha_pago datetime NOT NULL,
   fecha_fin_periodo datetime NOT NULL,
-  --CONSTRAINT FK_BI_anuncio_BI_tipo_moneda1 FOREIGN KEY (id_moneda) REFERENCES TERCER_MALON.BI_tipo_moneda (id_moneda),
-  --CONSTRAINT PK_BI_fact_anuncio PRIMARY KEY (id_alquiler,)
+  id_estado_alquiler NUMERIC(18,0) NOT NULL,
+  incremento NUMERIC(18,0) NOT NULL,
+  id_operacion NUMERIC(18,0) NOT NULL,
+  id_sucursal NUMERIC(18,0) NOT NULL,
+  comision NUMERIC(18,2) NOT NULL,
+  CONSTRAINT FK_BI_alquiler_BI_ubicacion_barrio1 FOREIGN KEY (id_barrio) REFERENCES TERCER_MALON.BI_ubicacion_barrio (id_barrio),
+  CONSTRAINT FK_BI_alquiler_BI_tiempo1 FOREIGN KEY (id_tiempo) REFERENCES TERCER_MALON.BI_tiempo (id_tiempo),
+  CONSTRAINT FK_BI_alquiler_BI_rango_etario1 FOREIGN KEY (id_rango_etario_inq) REFERENCES TERCER_MALON.BI_rango_etario (id_rango_etario),
+  CONSTRAINT FK_BI_alquiler_BI_estado_alquiler1 FOREIGN KEY (id_estado_alquiler) REFERENCES TERCER_MALON.BI_estado_alquiler (id_estado_alquiler),
+  CONSTRAINT FK_BI_alquiler_BI_tipo_operacion1 FOREIGN KEY (id_operacion) REFERENCES TERCER_MALON.BI_tipo_operacion (id_operacion),
+  CONSTRAINT FK_BI_alquiler_BI_sucursal1 FOREIGN KEY (id_sucursal) REFERENCES TERCER_MALON.BI_sucursal (id_sucursal),
+  CONSTRAINT PK_BI_fact_alquiler PRIMARY KEY (id_alquiler, id_barrio, id_tiempo, id_rango_etario_inq, id_estado_alquiler,id_operacion,id_sucursal)
   );
 GO
+
+-- -----------------------------------------------------
+-- Table TERCER_MALON.BI_fact_venta
+-- -----------------------------------------------------
+CREATE TABLE TERCER_MALON.BI_fact_venta (
+  id_venta NUMERIC(18,0) NOT NULL,
+  id_tipo_inmueble NUMERIC(18,0) NOT NULL,
+  id_localidad NUMERIC(18,0) NOT NULL,
+  id_tiempo NUMERIC(18,0) NOT NULL, -- segun fecha_venta
+  id_rango NUMERIC(18,0) NOT NULL,
+  precio_por_m2 NUMERIC(18,2) NOT NULL, -- precio/m2
+  id_operacion NUMERIC(18,0) NOT NULL,
+  id_sucursal NUMERIC(18,0) NOT NULL,
+  comision NUMERIC(18,2) NOT NULL,
+  CONSTRAINT FK_BI_venta_BI_tipo_inmueble1 FOREIGN KEY (id_tipo_inmueble) REFERENCES TERCER_MALON.BI_tipo_inmueble (id_tipo_inmueble),
+  CONSTRAINT FK_BI_venta_BI_ubicacion_localidad1 FOREIGN KEY (id_localidad) REFERENCES TERCER_MALON.BI_ubicacion_localidad (id_localidad),
+  CONSTRAINT FK_BI_venta_BI_tiempo1 FOREIGN KEY (id_tiempo) REFERENCES TERCER_MALON.BI_tiempo (id_tiempo),
+  CONSTRAINT FK_BI_venta_BI_rango_m21 FOREIGN KEY (id_rango) REFERENCES TERCER_MALON.BI_rango_m2 (id_rango),
+  CONSTRAINT FK_BI_venta_BI_tipo_operacion1 FOREIGN KEY (id_operacion) REFERENCES TERCER_MALON.BI_tipo_operacion (id_operacion),
+  CONSTRAINT FK_BI_venta_BI_sucursal1 FOREIGN KEY (id_sucursal) REFERENCES TERCER_MALON.BI_sucursal (id_sucursal),
+  CONSTRAINT PK_BI_fact_venta PRIMARY KEY (id_venta, id_tipo_inmueble, id_localidad,id_tiempo,id_rango,id_operacion));
+--entendemos por ventas concretas todas aquellas ventas que estan en la tabla TERCER_MALON.venta
+GO
+
 -- -----------------------------------------------------
 -- -----------------------------------------------------
 --					INSERTS
@@ -295,24 +308,27 @@ GO
 TODO: CAMBIAR IDS POR NOMBRE/TIPO CON JOINS
 */
 
+--1
 CREATE VIEW [TERCER_MALON].[V_Anuncio_Promedio_Publicacion]
 AS
-	SELECT id_operacion, id_barrio, id_ambiente, cuatrimestre, anio, avg(duracion_publicacion) as prom_duracion
+	SELECT id_operacion, id_barrio, id_ambiente, cuatrimestre, anio, AVG(duracion_publicacion) as prom_duracion
 	FROM TERCER_MALON.BI_fact_anuncio 
 	JOIN TERCER_MALON.BI_tiempo on BI_fact_anuncio.id_tiempo=BI_tiempo.id_tiempo
 	--join
 	GROUP BY id_operacion, id_barrio, id_ambiente, cuatrimestre, anio
 GO
 
+--2
 CREATE VIEW [TERCER_MALON].[V_Anuncio_Promedio_Precio]
 AS
-	SELECT id_operacion, id_tipo_inmueble, id_rango, cuatrimestre, anio, avg(precio_publicado) as prom_precio , id_moneda
+	SELECT id_operacion, id_tipo_inmueble, id_rango, cuatrimestre, anio, AVG(precio_publicado) as prom_precio , id_moneda
 	FROM TERCER_MALON.BI_fact_anuncio 
 	JOIN TERCER_MALON.BI_tiempo on BI_fact_anuncio.id_tiempo=BI_tiempo.id_tiempo
 	--hacer joins
 	GROUP BY id_operacion, id_tipo_inmueble, id_rango, cuatrimestre, anio, id_moneda
 GO
 
+--3
 CREATE VIEW [TERCER_MALON].[V_Alquiler_Barrios_Populares]
 AS
 	SELECT TOP 5
@@ -346,6 +362,48 @@ from tercer_malon.pago_alquiler
 GROUP BY YEAR(fecha_fin_periodo), MONTH(fecha_fin_periodo)
 ORDER BY YEAR(fecha_fin_periodo), MONTH(fecha_fin_periodo)
 
+select * from tercer_malon.estado_alquiler
+
 select * from tercer_malon.detalle_alquiler
 where fecha>fecha_fin_periodo
 */
+
+--5
+CREATE VIEW [TERCER_MALON].[V_Alquiler_Promedio_Incremento_Valor]
+AS
+	--por fecha_pago???
+	SELECT YEAR(fecha_pago) AS anio, MONTH(fecha_pago) AS mes, AVG(incremento) AS prom_incremento
+	FROM TERCER_MALON.BI_fact_alquiler
+	WHERE id_estado_alquiler=1 --ACTIVOS (chequear que sea mismo valor)
+	GROUP BY YEAR(fecha_pago), MONTH(fecha_pago)
+	ORDER BY YEAR(fecha_pago), MONTH(fecha_pago)
+GO
+
+--6
+CREATE VIEW [TERCER_MALON].[V_Venta_Promedio_Precio_Por_M2]
+AS
+	SELECT anio, mes, id_tipo_inmueble, id_localidad, AVG(precio_por_m2) AS prom_precio_por_m2
+	FROM TERCER_MALON.BI_fact_venta
+	JOIN TERCER_MALON.BI_tiempo on BI_fact_venta.id_tiempo=BI_tiempo.id_tiempo
+	--joins
+	GROUP BY anio, mes, id_tipo_inmueble, id_localidad
+	ORDER BY anio, mes, id_tipo_inmueble, id_localidad
+GO
+
+--7
+CREATE VIEW [TERCER_MALON].[V_Venta_Promedio_Comision]
+AS
+	--VENTAS
+	SELECT anio, mes, id_operacion, id_sucursal, AVG(comision) as prom_comision
+	FROM TERCER_MALON.BI_fact_venta
+	JOIN TERCER_MALON.BI_tiempo on BI_fact_venta.id_tiempo=BI_tiempo.id_tiempo
+	--JOINS
+	UNION
+	--ALQUILERES
+	SELECT anio, mes, id_operacion, id_sucursal, AVG(comision) as prom_comision
+	FROM TERCER_MALON.BI_fact_alquiler
+	JOIN TERCER_MALON.BI_tiempo on BI_fact_alquiler.id_tiempo=BI_tiempo.id_tiempo
+	--JOINS
+	GROUP BY anio, mes, id_operacion, id_sucursal
+	ORDER BY anio, mes, id_operacion, id_sucursal
+GO
