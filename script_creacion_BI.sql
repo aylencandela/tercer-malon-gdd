@@ -160,8 +160,7 @@ CREATE TABLE TERCER_MALON.BI_fact_alquiler (
   CONSTRAINT FK_BI_alquiler_BI_estado_alquiler1 FOREIGN KEY (id_estado_alquiler) REFERENCES TERCER_MALON.BI_estado_alquiler (id_estado_alquiler),
   CONSTRAINT FK_BI_alquiler_BI_tipo_operacion1 FOREIGN KEY (id_operacion) REFERENCES TERCER_MALON.BI_tipo_operacion (id_operacion),
   CONSTRAINT FK_BI_alquiler_BI_sucursal1 FOREIGN KEY (id_sucursal) REFERENCES TERCER_MALON.BI_sucursal (id_sucursal),
-  CONSTRAINT PK_BI_fact_alquiler PRIMARY KEY (id_alquiler, id_barrio, id_tiempo, id_rango_etario_inq, id_estado_alquiler,id_operacion,id_sucursal)
-  );
+  CONSTRAINT PK_BI_fact_alquiler PRIMARY KEY (id_alquiler, id_barrio, id_tiempo, id_rango_etario_inq, id_estado_alquiler,id_operacion,id_sucursal));
 GO
 
 -- -----------------------------------------------------
@@ -183,8 +182,27 @@ CREATE TABLE TERCER_MALON.BI_fact_venta (
   CONSTRAINT FK_BI_venta_BI_rango_m21 FOREIGN KEY (id_rango) REFERENCES TERCER_MALON.BI_rango_m2 (id_rango),
   CONSTRAINT FK_BI_venta_BI_tipo_operacion1 FOREIGN KEY (id_operacion) REFERENCES TERCER_MALON.BI_tipo_operacion (id_operacion),
   CONSTRAINT FK_BI_venta_BI_sucursal1 FOREIGN KEY (id_sucursal) REFERENCES TERCER_MALON.BI_sucursal (id_sucursal),
-  CONSTRAINT PK_BI_fact_venta PRIMARY KEY (id_venta, id_tipo_inmueble, id_localidad,id_tiempo,id_rango,id_operacion));
+  CONSTRAINT PK_BI_fact_venta PRIMARY KEY (id_venta, id_tipo_inmueble, id_localidad,id_tiempo,id_rango,id_operacion,id_sucursal));
 --entendemos por ventas concretas todas aquellas ventas que estan en la tabla TERCER_MALON.venta
+GO
+
+-- -----------------------------------------------------
+-- Table TERCER_MALON.BI_fact_venta
+-- -----------------------------------------------------
+CREATE TABLE TERCER_MALON.BI_fact_operacion (
+  id_sucursal NUMERIC(18,0) NOT NULL,
+  id_rango_etario_agente NUMERIC(18,0) NOT NULL,
+  id_tiempo NUMERIC(18,0) NOT NULL, -- segun fecha_venta o fecha_inicio alquiler = concretados
+  total_concretados NUMERIC(18,0) NOT NULL,
+  id_operacion NUMERIC(18,0) NOT NULL,
+  id_moneda NUMERIC(18,0) NOT NULL,
+  monto_cierre NUMERIC(18,2) NOT NULL, --expensa inmueble
+  CONSTRAINT FK_BI_operacion_BI_sucursal1 FOREIGN KEY (id_sucursal) REFERENCES TERCER_MALON.BI_sucursal (id_sucursal),
+  CONSTRAINT FK_BI_operacion_BI_rango_etario1 FOREIGN KEY (id_rango_etario_agente) REFERENCES TERCER_MALON.BI_rango_etario (id_rango_etario),
+  CONSTRAINT FK_BI_operacion_BI_tiempo1 FOREIGN KEY (id_tiempo) REFERENCES TERCER_MALON.BI_tiempo (id_tiempo),
+  CONSTRAINT FK_BI_operacion_BI_tipo_operacion1 FOREIGN KEY (id_operacion) REFERENCES TERCER_MALON.BI_tipo_operacion (id_operacion),
+  CONSTRAINT FK_BI_operacion_BI_tipo_moneda1 FOREIGN KEY (id_moneda) REFERENCES TERCER_MALON.BI_tipo_moneda (id_moneda),
+  CONSTRAINT PK_BI_fact_venta PRIMARY KEY (id_sucursal, id_rango_etario_agente, id_tiempo, id_operacion, id_moneda));
 GO
 
 -- -----------------------------------------------------
@@ -198,11 +216,13 @@ INSERT INTO [TERCER_MALON].[BI_tiempo] --que mierda le pongo aca
            ,[anio]
            ,[cuatrimestre]
            ,[mes])
-     SELECT year(fecha_publicacion) as anio, datepart(quarter,fecha_publicacion) as cuatrimestre, month(fecha_publicacion) as mes FROM TERCER_MALON.anuncio
+     SELECT year(fecha_publicacion) as anio, datepart(quarter,fecha_publicacion) as cuatrimestre, month(fecha_publicacion) as mes FROM TERCER_MALON.anuncio --inicio publicacion
 	 UNION
-	 SELECT year(fecha_fin), datepart(quarter,fecha_fin), month(fecha_fin) FROM TERCER_MALON.anuncio
+	 SELECT year(fecha_fin), datepart(quarter,fecha_fin), month(fecha_fin) FROM TERCER_MALON.anuncio --fin publicacion
 	 UNION
-	 SELECT year(fecha_inicio), datepart(quarter,fecha_inicio), month(fecha_inicio) FROM TERCER_MALON.alquiler
+	 SELECT year(fecha_inicio), datepart(quarter,fecha_inicio), month(fecha_inicio) FROM TERCER_MALON.alquiler --alta alquiler
+	 UNION
+	 SELECT year(fecha), datepart(quarter,fecha), month(fecha) FROM TERCER_MALON.venta --venta concretada
 	 ORDER BY 1,2,3
 GO
 
@@ -406,4 +426,29 @@ AS
 	--JOINS
 	GROUP BY anio, mes, id_operacion, id_sucursal
 	ORDER BY anio, mes, id_operacion, id_sucursal
+GO
+
+--8
+CREATE VIEW [TERCER_MALON].[V_Operacion_Porcentaje_Concretados]
+AS
+	SELECT anio, id_sucursal, id_rango_etario_agente,
+	( total_concretados/ (SELECT COUNT(distinct id_anuncio) FROM TERCER_MALON.BI_fact_anuncio
+		JOIN TERCER_MALON.BI_tiempo t on BI_fact_anuncio.id_tiempo=BI_tiempo.id_tiempo 
+		WHERE t.anio = anio )) * 100 AS porcentaje_concretados_segun_total_anuncios
+	FROM TERCER_MALON.BI_fact_operacion
+	JOIN TERCER_MALON.BI_tiempo on BI_fact_operacion.id_tiempo=BI_tiempo.id_tiempo
+	--joins
+	GROUP BY anio, id_sucursal, id_rango_etario_agente
+	ORDER BY anio, id_sucursal, id_rango_etario_agente
+GO
+
+--9
+CREATE VIEW [TERCER_MALON].[V_Operacion_Monto_Total_Cierre]
+AS
+	SELECT anio, cuatrimestre, id_sucursal, id_operacion, id_moneda, SUM(monto_cierre) as monto_total_cierre
+	FROM TERCER_MALON.BI_fact_operacion
+	JOIN TERCER_MALON.BI_tiempo on BI_fact_operacion.id_tiempo=BI_tiempo.id_tiempo
+	--joins
+	GROUP BY anio, cuatrimestre, id_sucursal, id_operacion, id_moneda
+	ORDER BY anio, cuatrimestre, id_sucursal, id_operacion, id_moneda
 GO
