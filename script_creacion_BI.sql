@@ -166,19 +166,14 @@ GO
 CREATE TABLE TERCER_MALON.BI_fact_alquiler (
   id_alquiler NUMERIC(18,0) NOT NULL,
   id_barrio NUMERIC(18,0) NOT NULL,
-  id_tiempo NUMERIC(18,0) NOT NULL, -- segun fecha_inicio
+  id_tiempo NUMERIC(18,0) NOT NULL, -- segun fecha_inicio O fecha_fin_periodo
   id_rango_etario_inq NUMERIC(18,0) NOT NULL,
-
+  fecha_pago datetime NOT NULL,
+  fecha_fin_periodo datetime NOT NULL,
   --CONSTRAINT FK_BI_anuncio_BI_tipo_moneda1 FOREIGN KEY (id_moneda) REFERENCES TERCER_MALON.BI_tipo_moneda (id_moneda),
   --CONSTRAINT PK_BI_fact_anuncio PRIMARY KEY (id_alquiler,)
   );
 GO
-
-select * from tercer_malon.pago_alquiler
-where fecha>fecha_fin_periodo
-
-select * from tercer_malon.detalle_alquiler
-where fecha>fecha_fin_periodo
 -- -----------------------------------------------------
 -- -----------------------------------------------------
 --					INSERTS
@@ -193,6 +188,8 @@ INSERT INTO [TERCER_MALON].[BI_tiempo] --que mierda le pongo aca
      SELECT year(fecha_publicacion) as anio, datepart(quarter,fecha_publicacion) as cuatrimestre, month(fecha_publicacion) as mes FROM TERCER_MALON.anuncio
 	 UNION
 	 SELECT year(fecha_fin), datepart(quarter,fecha_fin), month(fecha_fin) FROM TERCER_MALON.anuncio
+	 UNION
+	 SELECT year(fecha_inicio), datepart(quarter,fecha_inicio), month(fecha_inicio) FROM TERCER_MALON.alquiler
 	 ORDER BY 1,2,3
 GO
 
@@ -294,9 +291,13 @@ GO
 --					VISTAS
 -- -----------------------------------------------------
 -- -----------------------------------------------------
+/*
+TODO: CAMBIAR IDS POR NOMBRE/TIPO CON JOINS
+*/
+
 CREATE VIEW [TERCER_MALON].[V_Anuncio_Promedio_Publicacion]
 AS
-	SELECT id_operacion, id_barrio, id_ambiente, cuatrimestre, anio, avg(duracion_publicacion)
+	SELECT id_operacion, id_barrio, id_ambiente, cuatrimestre, anio, avg(duracion_publicacion) as prom_duracion
 	FROM TERCER_MALON.BI_fact_anuncio 
 	JOIN TERCER_MALON.BI_tiempo on BI_fact_anuncio.id_tiempo=BI_tiempo.id_tiempo
 	--join
@@ -305,19 +306,46 @@ GO
 
 CREATE VIEW [TERCER_MALON].[V_Anuncio_Promedio_Precio]
 AS
-	SELECT id_operacion, id_tipo_inmueble, id_rango, cuatrimestre, anio, avg(precio_publicado) , id_moneda
+	SELECT id_operacion, id_tipo_inmueble, id_rango, cuatrimestre, anio, avg(precio_publicado) as prom_precio , id_moneda
 	FROM TERCER_MALON.BI_fact_anuncio 
 	JOIN TERCER_MALON.BI_tiempo on BI_fact_anuncio.id_tiempo=BI_tiempo.id_tiempo
 	--hacer joins
-	GROUP BY id_operacion, id_tipo_inmueble, id_rango, cuatrimestre, anio
+	GROUP BY id_operacion, id_tipo_inmueble, id_rango, cuatrimestre, anio, id_moneda
 GO
 
 CREATE VIEW [TERCER_MALON].[V_Alquiler_Barrios_Populares]
 AS
-	SELECT anio, cuatrimestre, id_rango_etario_inq, --nombrebarrio
-		COUNT(id_barrio)
+	SELECT TOP 5
+		anio, cuatrimestre, id_rango_etario_inq, id_barrio,
+		COUNT(distinct id_alquiler) AS cant_alquileres_dados_de_alta
 	FROM TERCER_MALON.BI_fact_alquiler
 	JOIN TERCER_MALON.BI_tiempo on BI_fact_alquiler.id_tiempo=BI_tiempo.id_tiempo
 	--hacer joins
-	GROUP BY anio, cuatrimestre, id_rango_etario_inq
+	GROUP BY anio, cuatrimestre, id_rango_etario_inq, id_barrio
+	ORDER BY COUNT(distinct id_alquiler) DESC
 GO
+
+CREATE VIEW [TERCER_MALON].[V_Alquiler_Incumplimiento_Pagos]
+AS
+	--periodo segun fecha fin
+	SELECT YEAR(fecha_fin_periodo) AS anio , MONTH(fecha_fin_periodo) AS mes, 
+		((select COUNT(*) from TERCER_MALON.BI_fact_alquiler A2 where A2.fecha_pago>A2.fecha_fin_periodo
+			AND YEAR(A2.fecha_fin_periodo)=YEAR(fecha_fin_periodo) AND  MONTH(A2.fecha_fin_periodo)=MONTH(fecha_fin_periodo) )
+		/ COUNT(*) * 100) AS porcentaje_impagos
+	FROM TERCER_MALON.BI_fact_alquiler
+	GROUP BY YEAR(fecha_fin_periodo), MONTH(fecha_fin_periodo)
+	ORDER BY YEAR(fecha_fin_periodo), MONTH(fecha_fin_periodo)
+GO
+
+/*
+select  YEAR(fecha_fin_periodo), MONTH(fecha_fin_periodo),
+(select COUNT(*) from TERCER_MALON.pago_alquiler A2 where A2.fecha>A2.fecha_fin_periodo
+			AND YEAR(A2.fecha_fin_periodo)=YEAR(fecha_fin_periodo) AND  MONTH(A2.fecha_fin_periodo)=MONTH(fecha_fin_periodo) )
+		/ COUNT(*) * 100
+from tercer_malon.pago_alquiler
+GROUP BY YEAR(fecha_fin_periodo), MONTH(fecha_fin_periodo)
+ORDER BY YEAR(fecha_fin_periodo), MONTH(fecha_fin_periodo)
+
+select * from tercer_malon.detalle_alquiler
+where fecha>fecha_fin_periodo
+*/
