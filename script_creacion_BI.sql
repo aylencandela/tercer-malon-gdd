@@ -174,7 +174,11 @@ CREATE TABLE TERCER_MALON.BI_fact_alquiler (
   );
 GO
 
-select * from tercer_malon.periodo
+select * from tercer_malon.pago_alquiler
+where fecha>fecha_fin_periodo
+
+select * from tercer_malon.detalle_alquiler
+where fecha>fecha_fin_periodo
 -- -----------------------------------------------------
 -- -----------------------------------------------------
 --					INSERTS
