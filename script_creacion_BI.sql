@@ -187,7 +187,7 @@ CREATE TABLE TERCER_MALON.BI_fact_venta (
 GO
 
 -- -----------------------------------------------------
--- Table TERCER_MALON.BI_fact_venta
+-- Table TERCER_MALON.BI_fact_operacion
 -- -----------------------------------------------------
 CREATE TABLE TERCER_MALON.BI_fact_operacion (
   id_sucursal NUMERIC(18,0) NOT NULL,
@@ -202,7 +202,7 @@ CREATE TABLE TERCER_MALON.BI_fact_operacion (
   CONSTRAINT FK_BI_operacion_BI_tiempo1 FOREIGN KEY (id_tiempo) REFERENCES TERCER_MALON.BI_tiempo (id_tiempo),
   CONSTRAINT FK_BI_operacion_BI_tipo_operacion1 FOREIGN KEY (id_operacion) REFERENCES TERCER_MALON.BI_tipo_operacion (id_operacion),
   CONSTRAINT FK_BI_operacion_BI_tipo_moneda1 FOREIGN KEY (id_moneda) REFERENCES TERCER_MALON.BI_tipo_moneda (id_moneda),
-  CONSTRAINT PK_BI_fact_venta PRIMARY KEY (id_sucursal, id_rango_etario_agente, id_tiempo, id_operacion, id_moneda));
+  CONSTRAINT PK_BI_fact_operacion PRIMARY KEY (id_sucursal, id_rango_etario_agente, id_tiempo, id_operacion, id_moneda));
 GO
 
 -- -----------------------------------------------------
@@ -319,6 +319,83 @@ INSERT INTO [TERCER_MALON].[BI_ubicacion_barrio]
 	FROM [TERCER_MALON].[barrio]
 GO
 
+
+-- Table TERCER_MALON.BI_estado_alquiler
+INSERT INTO [TERCER_MALON].[BI_estado_alquiler]
+           ([id_estado_alquiler]
+           ,[tipo])
+	SELECT [id_estado_alquiler]
+		  ,[tipo]
+	FROM [TERCER_MALON].[estado_alquiler]
+GO
+
+/*
+-- Table TERCER_MALON.BI_fact_anuncio
+INSERT INTO [TERCER_MALON].[BI_fact_anuncio]
+           ([duracion_publicacion]
+           ,[id_anuncio]
+           ,[id_operacion]
+           ,[id_barrio]
+           ,[id_ambiente]
+           ,[id_tiempo]
+           ,[id_tipo_inmueble]
+           ,[id_rango]
+           ,[precio_publicado]
+           ,[id_moneda])
+     VALUES
+           ()
+GO
+
+-- Table TERCER_MALON.BI_fact_alquiler
+INSERT INTO [TERCER_MALON].[BI_fact_alquiler]
+           ([id_alquiler]
+           ,[id_barrio]
+           ,[id_tiempo]
+           ,[id_rango_etario_inq]
+           ,[fecha_pago]
+           ,[fecha_fin_periodo]
+           ,[id_estado_alquiler]
+           ,[incremento]
+           ,[id_operacion]
+           ,[id_sucursal]
+           ,[comision])
+     VALUES
+           ()
+GO
+
+-- Table TERCER_MALON.BI_fact_venta
+INSERT INTO [TERCER_MALON].[BI_fact_venta]
+           ([id_venta]
+           ,[id_tipo_inmueble]
+           ,[id_localidad]
+           ,[id_tiempo]
+           ,[id_rango]
+           ,[precio_por_m2]
+           ,[id_operacion]
+           ,[id_sucursal]
+           ,[comision])
+     VALUES
+           ()
+GO
+
+-- Table TERCER_MALON.BI_fact_operacion
+INSERT INTO [TERCER_MALON].[BI_fact_operacion]
+           ([id_sucursal]
+           ,[id_rango_etario_agente]
+           ,[id_tiempo]
+           ,[total_concretados]
+           ,[id_operacion]
+           ,[id_moneda]
+           ,[monto_cierre])
+     VALUES
+           ()
+GO
+
+*/
+
+
+
+
 -- -----------------------------------------------------
 -- -----------------------------------------------------
 --					VISTAS
@@ -381,11 +458,6 @@ select  YEAR(fecha_fin_periodo), MONTH(fecha_fin_periodo),
 from tercer_malon.pago_alquiler
 GROUP BY YEAR(fecha_fin_periodo), MONTH(fecha_fin_periodo)
 ORDER BY YEAR(fecha_fin_periodo), MONTH(fecha_fin_periodo)
-
-select * from tercer_malon.estado_alquiler
-
-select * from tercer_malon.detalle_alquiler
-where fecha>fecha_fin_periodo
 */
 
 --5
