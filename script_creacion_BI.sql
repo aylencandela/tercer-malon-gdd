@@ -143,8 +143,7 @@ GO
 -- -----------------------------------------------------
 CREATE TABLE TERCER_MALON.BI_fact_anuncio
 (
-  duracion_publicacion NUMERIC(18,0) NOT NULL
-  -- fecha_publicacion - fecha_fin
+  duracion_publicacion NUMERIC(18,0) NOT NULL -- fecha_publicacion - fecha_fin
   ,id_anuncio           NUMERIC(18,0) NOT NULL
   ,id_operacion         NUMERIC(18,0) NOT NULL
   ,id_barrio            NUMERIC(18,0) NOT NULL
@@ -241,6 +240,35 @@ CREATE TABLE TERCER_MALON.BI_fact_operacion
   ,CONSTRAINT PK_BI_fact_operacion PRIMARY KEY (id_sucursal, id_rango_etario_agente, id_tiempo, id_operacion, id_moneda)
 );
 GO
+
+-- -----------------------------------------------------
+-- -----------------------------------------------------
+--					FUNCIONES AUXILIARES
+-- -----------------------------------------------------
+-- -----------------------------------------------------
+CREATE FUNCTION TERCER_MALON.FN_id_rango_segun_m2 (@superficie NUMERIC(18,2))
+RETURNS NUMERIC(18,0)
+AS
+BEGIN
+	RETURN (SELECT id_rango FROM TERCER_MALON.BI_rango_m2 
+				WHERE tipo_superficie = CASE 
+							WHEN @superficie<35 THEN 'MENOR_35'
+							WHEN @superficie>100 THEN 'MAYOR_100'
+							WHEN @superficie BETWEEN 35 AND 55 THEN 'ENTRE_35_55'
+							WHEN @superficie BETWEEN 55 AND 75 THEN 'ENTRE_55_75'
+							WHEN @superficie BETWEEN 75 AND 100 THEN 'ENTRE_75_100'
+							END
+			)
+END
+
+CREATE FUNCTION TERCER_MALON.FN_id_tiempo_segun_fecha (@fecha datetime)
+RETURNS NUMERIC(18,0)
+AS
+BEGIN
+	RETURN (SELECT id_tiempo FROM TERCER_MALON.BI_tiempo 
+				WHERE anio=YEAR(@fecha) AND mes=MONTH(@fecha) 
+			)
+END
 
 -- -----------------------------------------------------
 -- -----------------------------------------------------
@@ -405,7 +433,6 @@ FROM
   TERCER_MALON.estado_alquiler
 GO
 
-/*
 -- Table TERCER_MALON.BI_fact_anuncio
 INSERT INTO TERCER_MALON.BI_fact_anuncio
            (duracion_publicacion
@@ -418,10 +445,23 @@ INSERT INTO TERCER_MALON.BI_fact_anuncio
            ,id_rango
            ,precio_publicado
            ,id_moneda)
-     VALUES
-           ()
+     SELECT 
+			DATEDIFF(DAY,A.fecha_publicacion, A.fecha_fin) as duracion_dias_publicacion,
+			A.cod_anuncio, --22397 ANUNCIOS TOTALES
+			A.id_operacion,
+			I.id_barrio,
+			I.id_ambiente,
+			(SELECT TERCER_MALON.FN_id_tiempo_segun_fecha(A.fecha_publicacion)) as fecha_alta,
+			I.id_tipo_inmueble,
+			(SELECT TERCER_MALON.FN_id_rango_segun_m2(I.superficie_total)) AS id_rango,
+			A.precio_publicado,
+			A.id_moneda
+	 FROM TERCER_MALON.anuncio A
+	 JOIN TERCER_MALON.inmueble I ON A.cod_inmueble=I.cod_inmueble
+	 ORDER BY A.cod_anuncio, A.id_operacion
 GO
 
+/*
 -- Table TERCER_MALON.BI_fact_alquiler
 INSERT INTO TERCER_MALON.BI_fact_alquiler
            (id_alquiler

@@ -273,7 +273,8 @@ BEGIN
 END
 GO
 
-
+DROP FUNCTION TERCER_MALON.FN_id_rango_segun_m2
+DROP FUNCTION TERCER_MALON.FN_id_tiempo_segun_fecha
 -- -----------------------------------------------------
 -- MIGRACIONES
 -- -----------------------------------------------------
