@@ -144,7 +144,7 @@ GO
 CREATE TABLE TERCER_MALON.BI_fact_anuncio
 (
   duracion_publicacion NUMERIC(18,0) NOT NULL -- fecha_publicacion - fecha_fin
-  ,id_anuncio           NUMERIC(18,0) NOT NULL
+  ,id_anuncio           NUMERIC(19,0) NOT NULL
   ,id_operacion         NUMERIC(18,0) NOT NULL
   ,id_barrio            NUMERIC(18,0) NOT NULL
   ,id_ambiente          NUMERIC(18,0) NOT NULL
@@ -181,6 +181,7 @@ CREATE TABLE TERCER_MALON.BI_fact_alquiler
   ,incremento          NUMERIC(18,0) NOT NULL
   ,id_operacion        NUMERIC(18,0) NOT NULL
   ,id_sucursal         NUMERIC(18,0) NOT NULL
+  ,id_moneda           NUMERIC(18,0) NOT NULL
   ,comision            NUMERIC(18,2) NOT NULL
   ,CONSTRAINT FK_BI_alquiler_BI_ubicacion_barrio1 FOREIGN KEY (id_barrio) REFERENCES TERCER_MALON.BI_ubicacion_barrio (id_barrio)
   ,CONSTRAINT FK_BI_alquiler_BI_tiempo1 FOREIGN KEY (id_tiempo) REFERENCES TERCER_MALON.BI_tiempo (id_tiempo)
@@ -188,7 +189,8 @@ CREATE TABLE TERCER_MALON.BI_fact_alquiler
   ,CONSTRAINT FK_BI_alquiler_BI_estado_alquiler1 FOREIGN KEY (id_estado_alquiler) REFERENCES TERCER_MALON.BI_estado_alquiler (id_estado_alquiler)
   ,CONSTRAINT FK_BI_alquiler_BI_tipo_operacion1 FOREIGN KEY (id_operacion) REFERENCES TERCER_MALON.BI_tipo_operacion (id_operacion)
   ,CONSTRAINT FK_BI_alquiler_BI_sucursal1 FOREIGN KEY (id_sucursal) REFERENCES TERCER_MALON.BI_sucursal (id_sucursal)
-  ,CONSTRAINT PK_BI_fact_alquiler PRIMARY KEY (id_alquiler, id_barrio, id_tiempo, id_rango_etario_inq, id_estado_alquiler,id_operacion,id_sucursal)
+  ,CONSTRAINT FK_BI_alquiler_BI_tipo_moneda1 FOREIGN KEY (id_moneda) REFERENCES TERCER_MALON.BI_tipo_moneda (id_moneda)
+  ,CONSTRAINT PK_BI_fact_alquiler PRIMARY KEY (id_alquiler, id_barrio, id_tiempo, id_rango_etario_inq, id_estado_alquiler, id_operacion, id_sucursal, id_moneda)
 );
 GO
 
@@ -207,6 +209,7 @@ CREATE TABLE TERCER_MALON.BI_fact_venta
   -- precio/m2
   ,id_operacion     NUMERIC(18,0) NOT NULL
   ,id_sucursal      NUMERIC(18,0) NOT NULL
+  ,id_moneda        NUMERIC(18,0) NOT NULL
   ,comision         NUMERIC(18,2) NOT NULL
   ,CONSTRAINT FK_BI_venta_BI_tipo_inmueble1 FOREIGN KEY (id_tipo_inmueble) REFERENCES TERCER_MALON.BI_tipo_inmueble (id_tipo_inmueble)
   ,CONSTRAINT FK_BI_venta_BI_ubicacion_localidad1 FOREIGN KEY (id_localidad) REFERENCES TERCER_MALON.BI_ubicacion_localidad (id_localidad)
@@ -214,7 +217,9 @@ CREATE TABLE TERCER_MALON.BI_fact_venta
   ,CONSTRAINT FK_BI_venta_BI_rango_m21 FOREIGN KEY (id_rango) REFERENCES TERCER_MALON.BI_rango_m2 (id_rango)
   ,CONSTRAINT FK_BI_venta_BI_tipo_operacion1 FOREIGN KEY (id_operacion) REFERENCES TERCER_MALON.BI_tipo_operacion (id_operacion)
   ,CONSTRAINT FK_BI_venta_BI_sucursal1 FOREIGN KEY (id_sucursal) REFERENCES TERCER_MALON.BI_sucursal (id_sucursal)
-  ,CONSTRAINT PK_BI_fact_venta PRIMARY KEY (id_venta, id_tipo_inmueble, id_localidad,id_tiempo,id_rango,id_operacion,id_sucursal)
+  ,CONSTRAINT FK_BI_venta_BI_tipo_moneda1 FOREIGN KEY (id_moneda) REFERENCES TERCER_MALON.BI_tipo_moneda (id_moneda)
+  ,CONSTRAINT PK_BI_fact_venta PRIMARY KEY (id_venta, id_tipo_inmueble, id_localidad, id_tiempo, id_rango, id_operacion, id_sucursal, id_moneda)
+
 );
 --entendemos por ventas concretas todas aquellas ventas que estan en la tabla TERCER_MALON.venta
 GO
@@ -489,7 +494,8 @@ INSERT INTO TERCER_MALON.BI_fact_alquiler
            ,incremento
            ,id_operacion
            ,id_sucursal
-           ,comision)
+           ,comision
+           ,id_moneda)
     SELECT 
 		A.cod_alquiler,
 		I.id_barrio,
@@ -505,7 +511,8 @@ INSERT INTO TERCER_MALON.BI_fact_alquiler
 			WHERE PA2.cod_alquiler=A.cod_alquiler AND DATEDIFF(MONTH,PA2.fecha, PA.fecha)=1),0) *100 AS incremento_respecto_mes_anterior,
 		AN.id_operacion,
 		AG.cod_sucursal,
-		A.comision
+		A.comision,
+    an.id_moneda
 	FROM TERCER_MALON.alquiler A
 	JOIN TERCER_MALON.inquilino INQ ON A.id_inquilino=INQ.id_inquilino
 	JOIN TERCER_MALON.pago_alquiler PA ON A.cod_alquiler=PA.cod_alquiler
@@ -549,7 +556,7 @@ INSERT INTO TERCER_MALON.BI_fact_operacion
 			 id_tiempo,
 			 --total concretado
 			 id_operacion,
-			 (SELECT id_moneda FROM TERCER_MALON.BI_fact_anuncio WHERE id_alquiler=FA.id_alquiler)
+       id_moneda,
 			 --montocierre
 		 FROM TERCER_MALON.BI_fact_alquiler FA
 	 UNION
