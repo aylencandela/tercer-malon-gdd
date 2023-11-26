@@ -169,13 +169,14 @@ GO
 -- -----------------------------------------------------
 CREATE TABLE TERCER_MALON.BI_fact_alquiler
 (
-  id_alquiler         NUMERIC(18,0) NOT NULL
+  id_alquiler          NUMERIC(18,0) NOT NULL
   ,id_barrio           NUMERIC(18,0) NOT NULL
   ,id_tiempo           NUMERIC(18,0) NOT NULL
   -- segun fecha_inicio = alta alquiler
   ,id_rango_etario_inq NUMERIC(18,0) NOT NULL
-  ,fecha_pago          DATETIME      NOT NULL
-  ,fecha_fin_periodo   DATETIME      NOT NULL
+  ,fecha_pago		   DATETIME		 NOT NULL
+  ,fecha_fin_periodo   DATETIME		 NOT NULL
+  ,es_pago_atrasado	   BIT			 NOT NULL
   ,id_estado_alquiler  NUMERIC(18,0) NOT NULL
   ,incremento          NUMERIC(18,0) NOT NULL
   ,id_operacion        NUMERIC(18,0) NOT NULL
@@ -270,6 +271,19 @@ BEGIN
 			)
 END
 
+CREATE FUNCTION TERCER_MALON.FN_id_etario_segun_nacimiento (@nacimiento datetime)
+RETURNS NUMERIC(18,0)
+AS
+BEGIN
+	RETURN (SELECT id_rango_etario FROM TERCER_MALON.BI_rango_etario 
+				WHERE tipo = CASE 
+							WHEN @nacimiento<25 THEN 'MENOR_25'
+							WHEN @nacimiento>50 THEN 'MAYOR_50'
+							WHEN @nacimiento BETWEEN 25 AND 35 THEN 'ENTRE_25_35'
+							WHEN @nacimiento BETWEEN 35 AND 50 THEN 'ENTRE_35_50'
+							END
+			)
+END
 -- -----------------------------------------------------
 -- -----------------------------------------------------
 --					INSERTS
@@ -461,24 +475,49 @@ INSERT INTO TERCER_MALON.BI_fact_anuncio
 	 ORDER BY A.cod_anuncio, A.id_operacion
 GO
 
-/*
+
 -- Table TERCER_MALON.BI_fact_alquiler
 INSERT INTO TERCER_MALON.BI_fact_alquiler
            (id_alquiler
            ,id_barrio
            ,id_tiempo
            ,id_rango_etario_inq
-           ,fecha_pago
-           ,fecha_fin_periodo
+		   ,fecha_pago
+		   ,fecha_fin_periodo
+		   ,es_pago_atrasado
            ,id_estado_alquiler
            ,incremento
            ,id_operacion
            ,id_sucursal
            ,comision)
-     VALUES
-           ()
+    SELECT 
+		A.cod_alquiler,
+		I.id_barrio,
+		(SELECT TERCER_MALON.FN_id_tiempo_segun_fecha(A.fecha_inicio)) as fecha_alta,
+		(SELECT TERCER_MALON.FN_id_etario_segun_nacimiento(INQ.fecha_nacimiento)) AS id_rango_etario_inq,
+		PA.fecha,
+		PA.fecha_fin_periodo,
+		(CASE WHEN PA.fecha>PA.fecha_fin_periodo THEN 1 ELSE 0 END) AS es_pago_atrasado,
+		A.id_estado_alquiler,
+		ISNULL((PA.importe - (SELECT importe as importe_mes_anterior FROM TERCER_MALON.pago_alquiler PA2
+								WHERE PA2.cod_alquiler=A.cod_alquiler AND DATEDIFF(MONTH,PA2.fecha, PA.fecha)=1))
+			/ (SELECT importe as importe_mes_anterior FROM TERCER_MALON.pago_alquiler PA2
+			WHERE PA2.cod_alquiler=A.cod_alquiler AND DATEDIFF(MONTH,PA2.fecha, PA.fecha)=1),0) *100 AS incremento_respecto_mes_anterior,
+		AN.id_operacion,
+		AG.cod_sucursal,
+		A.comision
+	FROM TERCER_MALON.alquiler A
+	JOIN TERCER_MALON.inquilino INQ ON A.id_inquilino=INQ.id_inquilino
+	JOIN TERCER_MALON.pago_alquiler PA ON A.cod_alquiler=PA.cod_alquiler
+	JOIN TERCER_MALON.anuncio AN ON A.cod_anuncio=AN.cod_anuncio
+	JOIN TERCER_MALON.agente AG ON AN.id_agente=AG.id_agente
+	JOIN TERCER_MALON.inmueble I ON AN.cod_inmueble=I.cod_inmueble
 GO
+-- ALQUILERES=12842, PAGOS=229004
 
+--2025-01-02 00:00:00.000
+SELECT * FROM TERCER_MALON.pago_alquiler WHERE cod_alquiler=151516
+/*
 -- Table TERCER_MALON.BI_fact_venta
 INSERT INTO TERCER_MALON.BI_fact_venta
            (id_venta
@@ -493,6 +532,7 @@ INSERT INTO TERCER_MALON.BI_fact_venta
      VALUES
            ()
 GO
+*/
 
 -- Table TERCER_MALON.BI_fact_operacion
 INSERT INTO TERCER_MALON.BI_fact_operacion
@@ -503,13 +543,20 @@ INSERT INTO TERCER_MALON.BI_fact_operacion
            ,id_operacion
            ,id_moneda
            ,monto_cierre)
-     VALUES
-           ()
+		 SELECT DISTINCT
+			 id_sucursal,
+			 --etario
+			 id_tiempo,
+			 --total concretado
+			 id_operacion,
+			 (SELECT id_moneda FROM TERCER_MALON.BI_fact_anuncio WHERE id_alquiler=FA.id_alquiler)
+			 --montocierre
+		 FROM TERCER_MALON.BI_fact_alquiler FA
+	 UNION
+		 SELECT DISTINCT
+			*
+		 FROM TERCER_MALON.BI_fact_venta FV
 GO
-
-*/
-
-
 
 
 -- -----------------------------------------------------
@@ -530,7 +577,7 @@ AS
     ,id_ambiente
     ,cuatrimestre
     ,anio
-    ,AVG(duracion_publicacion) AS prom_duracion
+    ,ROUND(AVG(duracion_publicacion),2) AS prom_duracion
   FROM
     TERCER_MALON.BI_fact_anuncio
     JOIN TERCER_MALON.BI_tiempo ON BI_fact_anuncio.id_tiempo=BI_tiempo.id_tiempo
@@ -547,7 +594,7 @@ AS
     ,id_rango
     ,cuatrimestre
     ,anio
-    ,AVG(precio_publicado) AS prom_precio 
+    ,ROUND(AVG(precio_publicado),2) AS prom_precio 
     ,id_moneda
   FROM
     TERCER_MALON.BI_fact_anuncio
@@ -565,7 +612,7 @@ AS
     ,cuatrimestre
     ,id_rango_etario_inq
     ,id_barrio
-    ,COUNT(DISTINCT id_alquiler) AS cant_alquileres_dados_de_alta
+    ,COUNT(DISTINCT id_alquiler) AS cant_alta_alquiler
   FROM
     TERCER_MALON.BI_fact_alquiler
     JOIN TERCER_MALON.BI_tiempo ON BI_fact_alquiler.id_tiempo=BI_tiempo.id_tiempo
@@ -574,7 +621,8 @@ AS
   ORDER BY COUNT(DISTINCT id_alquiler) DESC
 GO
 
-CREATE VIEW TERCER_MALON.V_Alquiler_Incumplimiento_Pagos
+--4.1
+CREATE VIEW TERCER_MALON.V_Alquiler_Incumplimiento_Pagos_V1
 AS
   --periodo segun fecha fin
   SELECT
@@ -587,6 +635,19 @@ AS
     WHERE A2.fecha_pago>A2.fecha_fin_periodo
       AND YEAR(A2.fecha_fin_periodo)=YEAR(fecha_fin_periodo) AND MONTH(A2.fecha_fin_periodo)=MONTH(fecha_fin_periodo) )
 		/ COUNT(*) * 100) AS porcentaje_impagos
+  FROM
+    TERCER_MALON.BI_fact_alquiler
+  GROUP BY YEAR(fecha_fin_periodo), MONTH(fecha_fin_periodo)
+  ORDER BY YEAR(fecha_fin_periodo), MONTH(fecha_fin_periodo)
+GO
+
+--4.2
+CREATE VIEW TERCER_MALON.V_Alquiler_Incumplimiento_Pagos_V2
+AS
+  SELECT
+    YEAR(fecha_fin_periodo) AS anio 
+    ,MONTH(fecha_fin_periodo) AS mes
+    ,(SUM(es_pago_atrasado)/ COUNT(*)) * 100 AS porcentaje_impagos
   FROM
     TERCER_MALON.BI_fact_alquiler
   GROUP BY YEAR(fecha_fin_periodo), MONTH(fecha_fin_periodo)
@@ -606,15 +667,14 @@ ORDER BY YEAR(fecha_fin_periodo), MONTH(fecha_fin_periodo)
 --5
 CREATE VIEW TERCER_MALON.V_Alquiler_Promedio_Incremento_Valor
 AS
-  --por fecha_pago???
   SELECT
     YEAR(fecha_pago) AS anio
     ,MONTH(fecha_pago) AS mes
-    ,AVG(incremento) AS prom_incremento
+    ,ROUND(AVG(incremento),2) AS prom_incremento
   FROM
     TERCER_MALON.BI_fact_alquiler
-  WHERE id_estado_alquiler=1
-  --ACTIVOS (chequear que sea mismo valor)
+  WHERE id_estado_alquiler=(SELECT id_estado_alquiler FROM TERCER_MALON.BI_estado_alquiler WHERE tipo='Activo')
+	AND incremento!=0
   GROUP BY YEAR(fecha_pago), MONTH(fecha_pago)
   ORDER BY YEAR(fecha_pago), MONTH(fecha_pago)
 GO

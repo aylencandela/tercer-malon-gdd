@@ -275,6 +275,7 @@ GO
 
 DROP FUNCTION TERCER_MALON.FN_id_rango_segun_m2
 DROP FUNCTION TERCER_MALON.FN_id_tiempo_segun_fecha
+DROP FUNCTION TERCER_MALON.FN_id_etario_segun_nacimiento
 -- -----------------------------------------------------
 -- MIGRACIONES
 -- -----------------------------------------------------
