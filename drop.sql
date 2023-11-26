@@ -242,6 +242,36 @@ BEGIN
     PRINT '<<< DROPPED TABLE BI_ubicacion_barrio >>>'
 END
 GO
+IF OBJECT_ID('TERCER_MALON.BI_estado_alquiler') IS NOT NULL
+BEGIN
+    DROP table TERCER_MALON.BI_estado_alquiler
+    PRINT '<<< DROPPED TABLE BI_estado_alquiler >>>'
+END
+GO
+IF OBJECT_ID('TERCER_MALON.BI_fact_anuncio') IS NOT NULL
+BEGIN
+    DROP table TERCER_MALON.BI_fact_anuncio
+    PRINT '<<< DROPPED TABLE BI_fact_anuncio >>>'
+END
+GO
+IF OBJECT_ID('TERCER_MALON.BI_fact_alquiler') IS NOT NULL
+BEGIN
+    DROP table TERCER_MALON.BI_fact_alquiler
+    PRINT '<<< DROPPED TABLE BI_fact_alquiler >>>'
+END
+GO
+IF OBJECT_ID('TERCER_MALON.BI_fact_venta') IS NOT NULL
+BEGIN
+    DROP table TERCER_MALON.BI_fact_venta
+    PRINT '<<< DROPPED TABLE BI_fact_venta >>>'
+END
+GO
+IF OBJECT_ID('TERCER_MALON.BI_fact_operacion') IS NOT NULL
+BEGIN
+    DROP table TERCER_MALON.BI_fact_operacion
+    PRINT '<<< DROPPED TABLE BI_fact_operacion >>>'
+END
+GO
 
 
 -- -----------------------------------------------------

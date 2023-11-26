@@ -16,7 +16,7 @@ CREATE TABLE TERCER_MALON.BI_tiempo
   ,anio         NUMERIC(18,0) NOT NULL
   ,cuatrimestre NUMERIC(18,0) NOT NULL
   ,mes          NUMERIC(18,0) NOT NULL
-  ,CONSTRAINT PK_id_tiempo PRIMARY KEY (id_tiempo)
+  ,CONSTRAINT PK_BI_tiempo PRIMARY KEY (id_tiempo)
 );
 GO
 
@@ -28,7 +28,7 @@ CREATE TABLE TERCER_MALON.BI_ubicacion_localidad
   id_localidad     NUMERIC(18,0) NOT NULL
   ,nombre_localidad NVARCHAR(100) NOT NULL
   ,nombre_provincia NVARCHAR(100) NOT NULL
-  ,CONSTRAINT PK_id_localidad PRIMARY KEY (id_localidad)
+  ,CONSTRAINT PK_BI_ubicacion_localidad PRIMARY KEY (id_localidad)
 );
 GO
 
@@ -42,7 +42,7 @@ CREATE TABLE TERCER_MALON.BI_sucursal
   ,direccion                           NVARCHAR(100) NOT NULL
   ,telefono                            NVARCHAR(100) NOT NULL
   ,BI_ubicacion_localidad_id_localidad NUMERIC(18,0) NOT NULL
-  ,CONSTRAINT PK_id_sucursal PRIMARY KEY (id_sucursal)
+  ,CONSTRAINT PK_BI_sucursal PRIMARY KEY (id_sucursal)
   ,CONSTRAINT FK_BI_sucursal_BI_ubicacion_localidad FOREIGN KEY (BI_ubicacion_localidad_id_localidad) REFERENCES TERCER_MALON.BI_ubicacion_localidad (id_localidad)
 );
 GO
@@ -54,7 +54,7 @@ CREATE TABLE TERCER_MALON.BI_rango_etario
 (
   id_rango_etario NUMERIC(18,0) IDENTITY(1,1)
   ,tipo            NVARCHAR(100) NOT NULL
-  ,CONSTRAINT PK_id_rango_etario PRIMARY KEY (id_rango_etario)
+  ,CONSTRAINT PK_BI_rango_etario PRIMARY KEY (id_rango_etario)
 );
 GO
 
@@ -65,7 +65,7 @@ CREATE TABLE TERCER_MALON.BI_tipo_inmueble
 (
   id_tipo_inmueble NUMERIC(18,0) NOT NULL
   ,tipo             NVARCHAR(100) NOT NULL
-  ,CONSTRAINT PK_id_tipo_inmueble PRIMARY KEY (id_tipo_inmueble)
+  ,CONSTRAINT PK_BI_tipo_inmueble PRIMARY KEY (id_tipo_inmueble)
 );
 GO
 
@@ -76,7 +76,7 @@ CREATE TABLE TERCER_MALON.BI_ambiente
 (
   id_ambiente NUMERIC(18,0) NOT NULL
   ,tipo        NVARCHAR(100) NOT NULL
-  ,CONSTRAINT PK_id_ambiente PRIMARY KEY (id_ambiente)
+  ,CONSTRAINT PK_BI_ambiente PRIMARY KEY (id_ambiente)
 );
 GO
 
@@ -86,8 +86,8 @@ GO
 CREATE TABLE TERCER_MALON.BI_rango_m2
 (
   id_rango        NUMERIC(18,0) IDENTITY(1,1)
-  ,tipo_superficie NUMERIC(18,0) NOT NULL
-  ,CONSTRAINT PK_id_rango PRIMARY KEY (id_rango)
+  ,tipo_superficie NVARCHAR(100) NOT NULL
+  ,CONSTRAINT PK_BI_rango_m2 PRIMARY KEY (id_rango)
 );
 GO
 
@@ -98,7 +98,7 @@ CREATE TABLE TERCER_MALON.BI_tipo_operacion
 (
   id_operacion NUMERIC(18,0) NOT NULL
   ,tipo         NVARCHAR(100) NOT NULL
-  ,CONSTRAINT PK_id_operacion PRIMARY KEY (id_operacion)
+  ,CONSTRAINT PK_BI_tipo_operacion PRIMARY KEY (id_operacion)
 );
 GO
 
@@ -110,7 +110,7 @@ CREATE TABLE TERCER_MALON.BI_tipo_moneda
   id_moneda NUMERIC(18,0) NOT NULL
   ,nombre    NVARCHAR(100) NOT NULL
   ,simbolo   NVARCHAR(100) NOT NULL
-  ,CONSTRAINT PK_id_moneda PRIMARY KEY (id_moneda)
+  ,CONSTRAINT PK_BI_tipo_moneda PRIMARY KEY (id_moneda)
 );
 GO
 
@@ -122,19 +122,19 @@ CREATE TABLE TERCER_MALON.BI_ubicacion_barrio
   id_barrio                           NUMERIC(18,0) NOT NULL
   ,nombre                              NVARCHAR(100) NOT NULL
   ,BI_ubicacion_localidad_id_localidad NUMERIC(18,0) NOT NULL
-  ,CONSTRAINT PK_id_barrio PRIMARY KEY (id_barrio)
+  ,CONSTRAINT PK_BI_ubicacion_barrio PRIMARY KEY (id_barrio)
   ,CONSTRAINT FK_BI_ubicacion_barrio_BI_ubicacion_localidad1 FOREIGN KEY (BI_ubicacion_localidad_id_localidad) REFERENCES TERCER_MALON.BI_ubicacion_localidad (id_localidad)
 );
 GO
 
 -- -----------------------------------------------------
--- Table TERCER_MALON.BI_ubicacion_barrio
+-- Table TERCER_MALON.BI_estado_alquiler
 -- -----------------------------------------------------
 CREATE TABLE TERCER_MALON.BI_estado_alquiler
 (
   id_estado_alquiler NUMERIC(18,0) NOT NULL
   ,tipo               NVARCHAR(100) NOT NULL
-  ,CONSTRAINT PK_id_estado_alquiler PRIMARY KEY (id_estado_alquiler)
+  ,CONSTRAINT PK_BI_estado_alquiler PRIMARY KEY (id_estado_alquiler)
 );
 GO
 
@@ -250,8 +250,7 @@ GO
 -- Table TERCER_MALON.BI_tiempo
 INSERT INTO TERCER_MALON.BI_tiempo
   --que mierda le pongo aca
-  (id_tiempo
-  ,anio
+  (anio
   ,cuatrimestre
   ,mes)
   SELECT
@@ -324,7 +323,7 @@ GO
 INSERT INTO TERCER_MALON.BI_rango_etario
   (tipo)
 VALUES
-  ('MENOR_25' ,'ENTRE_25_35' ,'ENTRE_35_50' ,'MAYOR_50')
+  ('MENOR_25') ,('ENTRE_25_35') ,('ENTRE_35_50') , ('MAYOR_50')
 GO
 
 -- Table TERCER_MALON.BI_tipo_inmueble
@@ -352,10 +351,9 @@ GO
 
 -- Table TERCER_MALON.BI_rango_m2
 INSERT INTO TERCER_MALON.BI_rango_m2
-  (id_rango
-  ,tipo_superficie)
+  (tipo_superficie)
 VALUES
-  ('MENOR_35' ,'ENTRE_35_55' ,'ENTRE_55_75' ,'ENTRE_75_100' ,'MAYOR_100')
+  ('MENOR_35')  ,('ENTRE_35_55') ,('ENTRE_55_75') ,('ENTRE_75_100') ,('MAYOR_100')
 GO
 
 -- Table TERCER_MALON.BI_tipo_operacion
