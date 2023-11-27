@@ -191,7 +191,7 @@ CREATE TABLE TERCER_MALON.BI_fact_alquiler
   ,id_tiempo_fin_periodo      NUMERIC(18,0) NOT NULL
   ,es_pago_atrasado	   BIT			 NOT NULL
   ,id_estado_alquiler  NUMERIC(18,0) NOT NULL
-  ,incremento          NUMERIC(18,0) NOT NULL
+  ,incremento          NUMERIC(18,2) NOT NULL
   ,id_operacion        NUMERIC(18,0) NOT NULL
   ,id_sucursal         NUMERIC(18,0) NOT NULL
   ,id_moneda           NUMERIC(18,0) NOT NULL
@@ -219,7 +219,6 @@ CREATE TABLE TERCER_MALON.BI_fact_venta
 (
   id_venta		    NUMERIC(18,0) NOT NULL
   ,id_tipo_inmueble NUMERIC(18,0) NOT NULL
-  ,id_localidad     NUMERIC(18,0) NOT NULL
   ,id_tiempo_venta        NUMERIC(18,0) NOT NULL
   -- segun fecha_venta
   ,id_rango_m2         NUMERIC(18,0) NOT NULL
@@ -233,14 +232,13 @@ CREATE TABLE TERCER_MALON.BI_fact_venta
   ,comision         NUMERIC(18,2) NOT NULL
   ,CONSTRAINT FK_BI_venta_BI_cod_operacion1 FOREIGN KEY (id_venta) REFERENCES TERCER_MALON.BI_cod_operacion (id_cod_operacion)
   ,CONSTRAINT FK_BI_venta_BI_tipo_inmueble1 FOREIGN KEY (id_tipo_inmueble) REFERENCES TERCER_MALON.BI_tipo_inmueble (id_tipo_inmueble)
-  ,CONSTRAINT FK_BI_venta_BI_ubicacion_localidad1 FOREIGN KEY (id_localidad) REFERENCES TERCER_MALON.BI_ubicacion_localidad (id_localidad)
   ,CONSTRAINT FK_BI_venta_BI_tiempo1 FOREIGN KEY (id_tiempo_venta) REFERENCES TERCER_MALON.BI_tiempo (id_tiempo)
   ,CONSTRAINT FK_BI_venta_BI_rango_m21 FOREIGN KEY (id_rango_m2) REFERENCES TERCER_MALON.BI_rango_m2 (id_rango_m2)
   ,CONSTRAINT FK_BI_venta_BI_tipo_operacion1 FOREIGN KEY (id_operacion) REFERENCES TERCER_MALON.BI_tipo_operacion (id_operacion)
   ,CONSTRAINT FK_BI_venta_BI_sucursal1 FOREIGN KEY (id_sucursal) REFERENCES TERCER_MALON.BI_sucursal (id_sucursal)
   ,CONSTRAINT FK_BI_venta_BI_tipo_moneda1 FOREIGN KEY (id_moneda) REFERENCES TERCER_MALON.BI_tipo_moneda (id_moneda)
   ,CONSTRAINT FK_BI_venta_BI_rango_etario2 FOREIGN KEY (id_rango_etario_empl) REFERENCES TERCER_MALON.BI_rango_etario (id_rango_etario)
-  ,CONSTRAINT PK_BI_fact_venta PRIMARY KEY (id_venta, id_tipo_inmueble, id_localidad, id_tiempo_venta, id_rango_m2, id_operacion, id_sucursal, id_moneda, id_rango_etario_empl)
+  ,CONSTRAINT PK_BI_fact_venta PRIMARY KEY (id_venta, id_tipo_inmueble, id_tiempo_venta, id_rango_m2, id_operacion, id_sucursal, id_moneda, id_rango_etario_empl)
 );
 --entendemos por ventas concretas todas aquellas ventas que estan en la tabla TERCER_MALON.venta
 GO
@@ -602,7 +600,6 @@ INSERT INTO TERCER_MALON.BI_fact_venta
 	SELECT --4058
 		V.cod_venta
 		,I.id_tipo_inmueble
-		,S.id_localidad
 		,(SELECT TERCER_MALON.FN_id_tiempo_segun_fecha(V.fecha)) AS fecha_venta
 		,(SELECT TERCER_MALON.FN_id_rango_segun_m2(I.superficie_total)) AS id_rango_m2
 		,(V.precio/I.superficie_total) AS precio_por_m2
@@ -620,7 +617,7 @@ INSERT INTO TERCER_MALON.BI_fact_venta
 GO
 
 
--- Table TERCER_MALON.BI_fact_operacion 16900 -> ALQUILERES=12842 VENTA=4058
+-- Table TERCER_MALON.BI_fact_operacion 16900 -> ALQUILERES=12842 + VENTA=4058
 INSERT INTO TERCER_MALON.BI_fact_operacion
            (id_sucursal
 		   ,id_venta_alq
@@ -630,7 +627,7 @@ INSERT INTO TERCER_MALON.BI_fact_operacion
            ,id_moneda
            ,comision
 		   ,monto_cierre)
-		SELECT DISTINCT
+		SELECT
 			 id_sucursal
 			 ,id_alquiler
 			 ,id_rango_etario_empl
@@ -642,7 +639,7 @@ INSERT INTO TERCER_MALON.BI_fact_operacion
 				-- tomamos importe porque para algunos alquileres no hay detalle_pago iniciales cargados
 		 FROM TERCER_MALON.BI_fact_alquiler FA
 	 UNION
-		 SELECT DISTINCT
+		 SELECT
 			 id_sucursal
 			 ,id_venta
 			 ,id_rango_etario_empl
@@ -773,7 +770,8 @@ AS
     TERCER_MALON.BI_fact_venta fv
     JOIN TERCER_MALON.BI_tiempo ON id_tiempo_venta=id_tiempo
 	JOIN TERCER_MALON.BI_tipo_inmueble I ON FV.id_tipo_inmueble=I.id_tipo_inmueble
-	JOIN TERCER_MALON.BI_ubicacion_localidad L ON FV.id_localidad=L.id_localidad
+	JOIN TERCER_MALON.BI_sucursal S ON FV.id_localidad=S.id_sucursal
+	JOIN TERCER_MALON.BI_ubicacion_localidad L ON S.id_localidad=L.id_localidad
   GROUP BY anio, mes, I.tipo, L.nombre_localidad, L.nombre_provincia
 GO
 
