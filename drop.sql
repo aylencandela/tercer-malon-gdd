@@ -180,6 +180,94 @@ END
 go
 
 -- -----------------------------------------------------
+-- MIGRACIONES
+-- -----------------------------------------------------
+IF EXISTS (SELECT * FROM sys.objects WHERE name = 'MigrarTipoInmueble')
+DROP PROCEDURE TERCER_MALON.MigrarTipoInmueble
+GO
+IF EXISTS (SELECT * FROM sys.objects WHERE name = 'MigrarMedioPago')
+DROP PROCEDURE TERCER_MALON.MigrarMedioPago
+GO
+IF EXISTS (SELECT * FROM sys.objects WHERE name = 'MigrarEstadoAnuncio')
+DROP PROCEDURE TERCER_MALON.MigrarEstadoAnuncio
+GO
+IF EXISTS (SELECT * FROM sys.objects WHERE name = 'MigrarEstadoAlquiler')
+DROP PROCEDURE TERCER_MALON.MigrarEstadoAlquiler
+GO
+IF EXISTS (SELECT * FROM sys.objects WHERE name = 'MigrarOperacion')
+DROP PROCEDURE TERCER_MALON.MigrarOperacion
+GO
+IF EXISTS (SELECT * FROM sys.objects WHERE name = 'MigrarAmbiente')
+DROP PROCEDURE TERCER_MALON.MigrarAmbiente
+GO
+IF EXISTS (SELECT * FROM sys.objects WHERE name = 'MigrarProvincia')
+DROP PROCEDURE TERCER_MALON.MigrarProvincia
+GO
+IF EXISTS (SELECT * FROM sys.objects WHERE name = 'MigrarLocalidad')
+DROP PROCEDURE TERCER_MALON.MigrarLocalidad
+GO
+IF EXISTS (SELECT * FROM sys.objects WHERE name = 'MigrarBarrio')
+DROP PROCEDURE TERCER_MALON.MigrarBarrio
+GO
+IF EXISTS (SELECT * FROM sys.objects WHERE name = 'MigrarSucursal')
+DROP PROCEDURE TERCER_MALON.MigrarSucursal
+GO
+IF EXISTS (SELECT * FROM sys.objects WHERE name = 'MigrarMoneda')
+DROP PROCEDURE TERCER_MALON.MigrarMoneda
+GO
+IF EXISTS (SELECT * FROM sys.objects WHERE name = 'MigrarAgente')
+DROP PROCEDURE TERCER_MALON.MigrarAgente
+GO
+IF EXISTS (SELECT * FROM sys.objects WHERE name = 'MigrarCaracteristica')
+DROP PROCEDURE TERCER_MALON.MigrarCaracteristica
+GO
+IF EXISTS (SELECT * FROM sys.objects WHERE name = 'MigrarCaracteristicaXInmueble')
+DROP PROCEDURE TERCER_MALON.MigrarCaracteristicaXInmueble
+GO
+IF EXISTS (SELECT * FROM sys.objects WHERE name = 'MigrarOrientacion')
+DROP PROCEDURE TERCER_MALON.MigrarOrientacion
+GO
+IF EXISTS (SELECT * FROM sys.objects WHERE name = 'MigrarDisposicion')
+DROP PROCEDURE TERCER_MALON.MigrarDisposicion
+GO
+IF EXISTS (SELECT * FROM sys.objects WHERE name = 'MigrarEstadoInmueble')
+DROP PROCEDURE TERCER_MALON.MigrarEstadoInmueble
+GO
+IF EXISTS (SELECT * FROM sys.objects WHERE name = 'MigrarPeriodo')
+DROP PROCEDURE TERCER_MALON.MigrarPeriodo
+GO
+IF EXISTS (SELECT * FROM sys.objects WHERE name = 'MigrarInmueble')
+DROP PROCEDURE TERCER_MALON.MigrarInmueble
+GO
+IF EXISTS (SELECT * FROM sys.objects WHERE name = 'MigrarAnuncio')
+DROP PROCEDURE TERCER_MALON.MigrarAnuncio
+GO
+IF EXISTS (SELECT * FROM sys.objects WHERE name = 'MigrarAlquiler')
+DROP PROCEDURE TERCER_MALON.MigrarAlquiler
+GO
+IF EXISTS (SELECT * FROM sys.objects WHERE name = 'MigrarVenta')
+DROP PROCEDURE TERCER_MALON.MigrarVenta
+GO
+IF EXISTS (SELECT * FROM sys.objects WHERE name = 'MigrarPropietario')
+DROP PROCEDURE TERCER_MALON.MigrarPropietario
+GO
+IF EXISTS (SELECT * FROM sys.objects WHERE name = 'MigrarInquilino')
+DROP PROCEDURE TERCER_MALON.MigrarInquilino
+GO
+IF EXISTS (SELECT * FROM sys.objects WHERE name = 'MigrarComprador')
+DROP PROCEDURE TERCER_MALON.MigrarComprador
+GO
+IF EXISTS (SELECT * FROM sys.objects WHERE name = 'MigrarPagoAlquiler')
+DROP PROCEDURE TERCER_MALON.MigrarPagoAlquiler
+GO
+IF EXISTS (SELECT * FROM sys.objects WHERE name = 'MigrarDetalleAlquiler')
+DROP PROCEDURE TERCER_MALON.MigrarDetalleAlquiler
+GO
+IF EXISTS (SELECT * FROM sys.objects WHERE name = 'MigrarPagoVenta')
+DROP PROCEDURE TERCER_MALON.MigrarPagoVenta
+GO
+
+-- -----------------------------------------------------
 -- MODELO BI
 -- -----------------------------------------------------
 IF OBJECT_ID('TERCER_MALON.BI_tiempo') IS NOT NULL
@@ -276,93 +364,60 @@ GO
 DROP FUNCTION TERCER_MALON.FN_id_rango_segun_m2
 DROP FUNCTION TERCER_MALON.FN_id_tiempo_segun_fecha
 DROP FUNCTION TERCER_MALON.FN_id_etario_segun_nacimiento
--- -----------------------------------------------------
--- MIGRACIONES
--- -----------------------------------------------------
-IF EXISTS (SELECT * FROM sys.objects WHERE name = 'MigrarTipoInmueble')
-DROP PROCEDURE TERCER_MALON.MigrarTipoInmueble
-GO
-IF EXISTS (SELECT * FROM sys.objects WHERE name = 'MigrarMedioPago')
-DROP PROCEDURE TERCER_MALON.MigrarMedioPago
-GO
-IF EXISTS (SELECT * FROM sys.objects WHERE name = 'MigrarEstadoAnuncio')
-DROP PROCEDURE TERCER_MALON.MigrarEstadoAnuncio
-GO
-IF EXISTS (SELECT * FROM sys.objects WHERE name = 'MigrarEstadoAlquiler')
-DROP PROCEDURE TERCER_MALON.MigrarEstadoAlquiler
-GO
-IF EXISTS (SELECT * FROM sys.objects WHERE name = 'MigrarOperacion')
-DROP PROCEDURE TERCER_MALON.MigrarOperacion
-GO
-IF EXISTS (SELECT * FROM sys.objects WHERE name = 'MigrarAmbiente')
-DROP PROCEDURE TERCER_MALON.MigrarAmbiente
-GO
-IF EXISTS (SELECT * FROM sys.objects WHERE name = 'MigrarProvincia')
-DROP PROCEDURE TERCER_MALON.MigrarProvincia
-GO
-IF EXISTS (SELECT * FROM sys.objects WHERE name = 'MigrarLocalidad')
-DROP PROCEDURE TERCER_MALON.MigrarLocalidad
-GO
-IF EXISTS (SELECT * FROM sys.objects WHERE name = 'MigrarBarrio')
-DROP PROCEDURE TERCER_MALON.MigrarBarrio
-GO
-IF EXISTS (SELECT * FROM sys.objects WHERE name = 'MigrarSucursal')
-DROP PROCEDURE TERCER_MALON.MigrarSucursal
-GO
-IF EXISTS (SELECT * FROM sys.objects WHERE name = 'MigrarMoneda')
-DROP PROCEDURE TERCER_MALON.MigrarMoneda
-GO
-IF EXISTS (SELECT * FROM sys.objects WHERE name = 'MigrarAgente')
-DROP PROCEDURE TERCER_MALON.MigrarAgente
-GO
 
-IF EXISTS (SELECT * FROM sys.objects WHERE name = 'MigrarCaracteristica')
-DROP PROCEDURE TERCER_MALON.MigrarCaracteristica
+IF OBJECT_ID('TERCER_MALON.V_Anuncio_Promedio_Publicacion') IS NOT NULL
+BEGIN
+    DROP VIEW TERCER_MALON.V_Anuncio_Promedio_Publicacion
+    PRINT '<<< DROPPED TABLE V_Anuncio_Promedio_Publicacion >>>'
+END
 GO
-IF EXISTS (SELECT * FROM sys.objects WHERE name = 'MigrarCaracteristicaXInmueble')
-DROP PROCEDURE TERCER_MALON.MigrarCaracteristicaXInmueble
+IF OBJECT_ID('TERCER_MALON.V_Anuncio_Promedio_Precio') IS NOT NULL
+BEGIN
+    DROP VIEW TERCER_MALON.V_Anuncio_Promedio_Precio
+    PRINT '<<< DROPPED TABLE V_Anuncio_Promedio_Precio >>>'
+END
 GO
-IF EXISTS (SELECT * FROM sys.objects WHERE name = 'MigrarOrientacion')
-DROP PROCEDURE TERCER_MALON.MigrarOrientacion
+IF OBJECT_ID('TERCER_MALON.V_Alquiler_Barrios_Populares') IS NOT NULL
+BEGIN
+    DROP VIEW TERCER_MALON.V_Alquiler_Barrios_Populares
+    PRINT '<<< DROPPED TABLE V_Alquiler_Barrios_Populares >>>'
+END
 GO
-IF EXISTS (SELECT * FROM sys.objects WHERE name = 'MigrarDisposicion')
-DROP PROCEDURE TERCER_MALON.MigrarDisposicion
+IF OBJECT_ID('TERCER_MALON.V_Alquiler_Incumplimiento_Pagos') IS NOT NULL
+BEGIN
+    DROP VIEW TERCER_MALON.V_Alquiler_Incumplimiento_Pagos
+    PRINT '<<< DROPPED TABLE V_Alquiler_Incumplimiento_Pagos >>>'
+END
 GO
-IF EXISTS (SELECT * FROM sys.objects WHERE name = 'MigrarEstadoInmueble')
-DROP PROCEDURE TERCER_MALON.MigrarEstadoInmueble
+IF OBJECT_ID('TERCER_MALON.V_Alquiler_Promedio_Incremento_Valor') IS NOT NULL
+BEGIN
+    DROP VIEW TERCER_MALON.V_Alquiler_Promedio_Incremento_Valor
+    PRINT '<<< DROPPED TABLE V_Alquiler_Promedio_Incremento_Valor >>>'
+END
 GO
-IF EXISTS (SELECT * FROM sys.objects WHERE name = 'MigrarPeriodo')
-DROP PROCEDURE TERCER_MALON.MigrarPeriodo
+IF OBJECT_ID('TERCER_MALON.V_Venta_Promedio_Precio_Por_M2') IS NOT NULL
+BEGIN
+    DROP VIEW TERCER_MALON.V_Venta_Promedio_Precio_Por_M2
+    PRINT '<<< DROPPED TABLE V_Venta_Promedio_Precio_Por_M2 >>>'
+END
 GO
-IF EXISTS (SELECT * FROM sys.objects WHERE name = 'MigrarInmueble')
-DROP PROCEDURE TERCER_MALON.MigrarInmueble
+IF OBJECT_ID('TERCER_MALON.V_Operacion_Promedio_Comision') IS NOT NULL
+BEGIN
+    DROP VIEW TERCER_MALON.V_Operacion_Promedio_Comision
+    PRINT '<<< DROPPED TABLE V_Operacion_Promedio_Comision >>>'
+END
 GO
-IF EXISTS (SELECT * FROM sys.objects WHERE name = 'MigrarAnuncio')
-DROP PROCEDURE TERCER_MALON.MigrarAnuncio
+IF OBJECT_ID('TERCER_MALON.V_Operacion_Porcentaje_Concretados') IS NOT NULL
+BEGIN
+    DROP VIEW TERCER_MALON.V_Operacion_Porcentaje_Concretados
+    PRINT '<<< DROPPED TABLE V_Operacion_Porcentaje_Concretados >>>'
+END
 GO
-IF EXISTS (SELECT * FROM sys.objects WHERE name = 'MigrarAlquiler')
-DROP PROCEDURE TERCER_MALON.MigrarAlquiler
-GO
-IF EXISTS (SELECT * FROM sys.objects WHERE name = 'MigrarVenta')
-DROP PROCEDURE TERCER_MALON.MigrarVenta
-GO
-IF EXISTS (SELECT * FROM sys.objects WHERE name = 'MigrarPropietario')
-DROP PROCEDURE TERCER_MALON.MigrarPropietario
-GO
-IF EXISTS (SELECT * FROM sys.objects WHERE name = 'MigrarInquilino')
-DROP PROCEDURE TERCER_MALON.MigrarInquilino
-GO
-IF EXISTS (SELECT * FROM sys.objects WHERE name = 'MigrarComprador')
-DROP PROCEDURE TERCER_MALON.MigrarComprador
-GO
-IF EXISTS (SELECT * FROM sys.objects WHERE name = 'MigrarPagoAlquiler')
-DROP PROCEDURE TERCER_MALON.MigrarPagoAlquiler
-GO
-IF EXISTS (SELECT * FROM sys.objects WHERE name = 'MigrarDetalleAlquiler')
-DROP PROCEDURE TERCER_MALON.MigrarDetalleAlquiler
-GO
-IF EXISTS (SELECT * FROM sys.objects WHERE name = 'MigrarPagoVenta')
-DROP PROCEDURE TERCER_MALON.MigrarPagoVenta
+IF OBJECT_ID('TERCER_MALON.V_Operacion_Monto_Total_Cierre') IS NOT NULL
+BEGIN
+    DROP VIEW TERCER_MALON.V_Operacion_Monto_Total_Cierre
+    PRINT '<<< DROPPED TABLE V_Operacion_Monto_Total_Cierre >>>'
+END
 GO
 
 drop schema TERCER_MALON
