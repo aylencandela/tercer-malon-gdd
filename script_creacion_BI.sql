@@ -85,9 +85,9 @@ GO
 -- -----------------------------------------------------
 CREATE TABLE TERCER_MALON.BI_rango_m2
 (
-  id_rango        NUMERIC(18,0) IDENTITY(1,1)
+  id_rango_m2        NUMERIC(18,0) IDENTITY(1,1)
   ,tipo_superficie NVARCHAR(100) NOT NULL
-  ,CONSTRAINT PK_BI_rango_m2 PRIMARY KEY (id_rango)
+  ,CONSTRAINT PK_BI_rango_m2 PRIMARY KEY (id_rango_m2)
 );
 GO
 
@@ -151,16 +151,16 @@ CREATE TABLE TERCER_MALON.BI_fact_anuncio
   ,id_tiempo            NUMERIC(18,0) NOT NULL
   -- segun fecha_publicacion
   ,id_tipo_inmueble     NUMERIC(18,0) NOT NULL
-  ,id_rango             NUMERIC(18,0) NOT NULL
+  ,id_rango_m2             NUMERIC(18,0) NOT NULL
   ,precio_publicado     NUMERIC(18,2) NOT NULL
   ,id_moneda            NUMERIC(18,0) NOT NULL
   ,CONSTRAINT FK_BI_anuncio_BI_tipo_operacion1 FOREIGN KEY (id_operacion) REFERENCES TERCER_MALON.BI_tipo_operacion (id_operacion)
   ,CONSTRAINT FK_BI_anuncio_BI_ubicacion_barrio1 FOREIGN KEY (id_barrio) REFERENCES TERCER_MALON.BI_ubicacion_barrio (id_barrio)
   ,CONSTRAINT FK_BI_anuncio_BI_ambiente1 FOREIGN KEY (id_ambiente) REFERENCES TERCER_MALON.BI_ambiente (id_ambiente)
   ,CONSTRAINT FK_BI_anuncio_BI_tipo_inmueble1 FOREIGN KEY (id_tipo_inmueble) REFERENCES TERCER_MALON.BI_tipo_inmueble (id_tipo_inmueble)
-  ,CONSTRAINT FK_BI_anuncio_BI_rango_m21 FOREIGN KEY (id_rango) REFERENCES TERCER_MALON.BI_rango_m2 (id_rango)
+  ,CONSTRAINT FK_BI_anuncio_BI_rango_m21 FOREIGN KEY (id_rango_m2) REFERENCES TERCER_MALON.BI_rango_m2 (id_rango_m2)
   ,CONSTRAINT FK_BI_anuncio_BI_tipo_moneda1 FOREIGN KEY (id_moneda) REFERENCES TERCER_MALON.BI_tipo_moneda (id_moneda)
-  ,CONSTRAINT PK_BI_fact_anuncio PRIMARY KEY (id_anuncio,id_operacion,id_barrio,id_ambiente,id_tiempo,id_tipo_inmueble,id_rango,id_moneda)
+  ,CONSTRAINT PK_BI_fact_anuncio PRIMARY KEY (id_anuncio,id_operacion,id_barrio,id_ambiente,id_tiempo,id_tipo_inmueble,id_rango_m2,id_moneda)
 );
 GO
 
@@ -208,7 +208,7 @@ CREATE TABLE TERCER_MALON.BI_fact_venta
   ,id_localidad     NUMERIC(18,0) NOT NULL
   ,id_tiempo_venta        NUMERIC(18,0) NOT NULL
   -- segun fecha_venta
-  ,id_rango         NUMERIC(18,0) NOT NULL
+  ,id_rango_m2         NUMERIC(18,0) NOT NULL
   ,precio_por_m2    NUMERIC(18,2) NOT NULL
   -- precio/m2
   ,id_operacion     NUMERIC(18,0) NOT NULL
@@ -220,12 +220,12 @@ CREATE TABLE TERCER_MALON.BI_fact_venta
   ,CONSTRAINT FK_BI_venta_BI_tipo_inmueble1 FOREIGN KEY (id_tipo_inmueble) REFERENCES TERCER_MALON.BI_tipo_inmueble (id_tipo_inmueble)
   ,CONSTRAINT FK_BI_venta_BI_ubicacion_localidad1 FOREIGN KEY (id_localidad) REFERENCES TERCER_MALON.BI_ubicacion_localidad (id_localidad)
   ,CONSTRAINT FK_BI_venta_BI_tiempo1 FOREIGN KEY (id_tiempo_venta) REFERENCES TERCER_MALON.BI_tiempo (id_tiempo)
-  ,CONSTRAINT FK_BI_venta_BI_rango_m21 FOREIGN KEY (id_rango) REFERENCES TERCER_MALON.BI_rango_m2 (id_rango)
+  ,CONSTRAINT FK_BI_venta_BI_rango_m21 FOREIGN KEY (id_rango_m2) REFERENCES TERCER_MALON.BI_rango_m2 (id_rango_m2)
   ,CONSTRAINT FK_BI_venta_BI_tipo_operacion1 FOREIGN KEY (id_operacion) REFERENCES TERCER_MALON.BI_tipo_operacion (id_operacion)
   ,CONSTRAINT FK_BI_venta_BI_sucursal1 FOREIGN KEY (id_sucursal) REFERENCES TERCER_MALON.BI_sucursal (id_sucursal)
   ,CONSTRAINT FK_BI_venta_BI_tipo_moneda1 FOREIGN KEY (id_moneda) REFERENCES TERCER_MALON.BI_tipo_moneda (id_moneda)
   ,CONSTRAINT FK_BI_venta_BI_rango_etario2 FOREIGN KEY (id_rango_etario_empl) REFERENCES TERCER_MALON.BI_rango_etario (id_rango_etario)
-  ,CONSTRAINT PK_BI_fact_venta PRIMARY KEY (id_venta, id_tipo_inmueble, id_localidad, id_tiempo_venta, id_rango, id_operacion, id_sucursal, id_moneda, id_rango_etario_empl)
+  ,CONSTRAINT PK_BI_fact_venta PRIMARY KEY (id_venta, id_tipo_inmueble, id_localidad, id_tiempo_venta, id_rango_m2, id_operacion, id_sucursal, id_moneda, id_rango_etario_empl)
 );
 --entendemos por ventas concretas todas aquellas ventas que estan en la tabla TERCER_MALON.venta
 GO
@@ -264,7 +264,7 @@ RETURNS NUMERIC(18,0)
 AS
 BEGIN
 	RETURN
-		(SELECT id_rango FROM TERCER_MALON.BI_rango_m2 
+		(SELECT id_rango_m2 FROM TERCER_MALON.BI_rango_m2 
 		WHERE tipo_superficie =
 				CASE 
 					WHEN @superficie<35 THEN 'MENOR_35'
@@ -443,13 +443,13 @@ GO
 
 -- Table TERCER_MALON.BI_tipo_moneda
 INSERT INTO TERCER_MALON.BI_tipo_moneda
-  (id_moneda
-  ,nombre
-  ,simbolo)
+		(id_moneda
+		,nombre
+		,simbolo)
 SELECT
-  id_moneda
-		  ,simbolo
-		  ,nombre
+		id_moneda
+		,nombre
+		,simbolo
 FROM
   TERCER_MALON.moneda
 GO
@@ -488,7 +488,7 @@ INSERT INTO TERCER_MALON.BI_fact_anuncio
            ,id_ambiente
            ,id_tiempo
            ,id_tipo_inmueble
-           ,id_rango
+           ,id_rango_m2
            ,precio_publicado
            ,id_moneda)
      SELECT 
@@ -499,7 +499,7 @@ INSERT INTO TERCER_MALON.BI_fact_anuncio
 			I.id_ambiente,
 			(SELECT TERCER_MALON.FN_id_tiempo_segun_fecha(A.fecha_publicacion)) AS fecha_alta,
 			I.id_tipo_inmueble,
-			(SELECT TERCER_MALON.FN_id_rango_segun_m2(I.superficie_total)) AS id_rango,
+			(SELECT TERCER_MALON.FN_id_rango_segun_m2(I.superficie_total)) AS id_rango_m2,
 			A.precio_publicado,
 			A.id_moneda
 	 FROM TERCER_MALON.anuncio A
@@ -558,7 +558,7 @@ INSERT INTO TERCER_MALON.BI_fact_venta
            ,id_tipo_inmueble
            ,id_localidad
            ,id_tiempo_venta
-           ,id_rango
+           ,id_rango_m2
            ,precio_por_m2
            ,id_operacion
            ,id_sucursal
@@ -571,7 +571,7 @@ INSERT INTO TERCER_MALON.BI_fact_venta
 		,I.id_tipo_inmueble
 		,S.id_localidad
 		,(SELECT TERCER_MALON.FN_id_tiempo_segun_fecha(V.fecha)) AS fecha_venta
-		,(SELECT TERCER_MALON.FN_id_rango_segun_m2(I.superficie_total)) AS id_rango
+		,(SELECT TERCER_MALON.FN_id_rango_segun_m2(I.superficie_total)) AS id_rango_m2
 		,(V.precio/I.superficie_total) AS precio_por_m2
 		,AN.id_operacion
 		,S.cod_sucursal
@@ -621,49 +621,51 @@ INSERT INTO TERCER_MALON.BI_fact_operacion
 		 FROM TERCER_MALON.BI_fact_venta
 	ORDER BY 2, id_operacion
 GO
---(14142, 4, 1, 1, 1)
+
 -- -----------------------------------------------------
 -- -----------------------------------------------------
 --					VISTAS
 -- -----------------------------------------------------
 -- -----------------------------------------------------
-/*
-TODO: CAMBIAR IDS POR NOMBRE/TIPO CON JOINS
-*/
 
 --1
 CREATE VIEW TERCER_MALON.V_Anuncio_Promedio_Publicacion
 AS
   SELECT
-    id_operacion
-    ,id_barrio
-    ,id_ambiente
-    ,cuatrimestre
-    ,anio
-    ,ROUND(AVG(duracion_publicacion),2) AS prom_duracion
+    anio
+	,cuatrimestre
+	,B.nombre AS barrio
+	,O.tipo AS tipo_operacion
+    ,A.tipo AS tipo_ambiente
+    ,ROUND(AVG(duracion_publicacion),2) AS prom_duracion_dias
   FROM
-    TERCER_MALON.BI_fact_anuncio
-    JOIN TERCER_MALON.BI_tiempo ON BI_fact_anuncio.id_tiempo=BI_tiempo.id_tiempo
-  --join
-  GROUP BY id_operacion, id_barrio, id_ambiente, cuatrimestre, anio
+    TERCER_MALON.BI_fact_anuncio FA
+    JOIN TERCER_MALON.BI_tiempo T ON FA.id_tiempo=T.id_tiempo
+	JOIN TERCER_MALON.BI_ubicacion_barrio B ON FA.id_barrio=B.id_barrio
+	JOIN TERCER_MALON.BI_tipo_operacion O ON FA.id_operacion=O.id_operacion
+	JOIN TERCER_MALON.BI_ambiente A ON FA.id_ambiente=A.id_ambiente
+  GROUP BY anio, cuatrimestre, B.nombre, O.tipo, A.tipo
 GO
 
 --2
 CREATE VIEW TERCER_MALON.V_Anuncio_Promedio_Precio
 AS
   SELECT
-    id_operacion
-    ,id_tipo_inmueble
-    ,id_rango
-    ,cuatrimestre
-    ,anio
+    anio
+	,cuatrimestre
+	,O.tipo AS tipo_operacion
+    ,I.tipo AS tipo_inmueble
+    ,R.tipo_superficie AS tipo_superficie
     ,ROUND(AVG(precio_publicado),2) AS prom_precio 
-    ,id_moneda
+    ,M.nombre AS tipo_moneda
   FROM
-    TERCER_MALON.BI_fact_anuncio
-    JOIN TERCER_MALON.BI_tiempo ON BI_fact_anuncio.id_tiempo=BI_tiempo.id_tiempo
-  --hacer joins
-  GROUP BY id_operacion, id_tipo_inmueble, id_rango, cuatrimestre, anio, id_moneda
+    TERCER_MALON.BI_fact_anuncio FA
+    JOIN TERCER_MALON.BI_tiempo T ON FA.id_tiempo=T.id_tiempo
+	JOIN TERCER_MALON.BI_tipo_operacion O ON FA.id_operacion=O.id_operacion
+	JOIN TERCER_MALON.BI_tipo_inmueble I ON FA.id_tipo_inmueble=I.id_tipo_inmueble
+	JOIN TERCER_MALON.BI_rango_m2 R ON FA.id_rango_m2=R.id_rango_m2
+	JOIN TERCER_MALON.BI_tipo_moneda M ON FA.id_moneda=M.id_moneda
+  GROUP BY anio, cuatrimestre, O.tipo, I.tipo, R.tipo_superficie, M.nombre
 GO
 
 --3
@@ -673,14 +675,15 @@ AS
     TOP 5
     anio
     ,cuatrimestre
-    ,id_rango_etario_inq
-    ,id_barrio
+    ,B.nombre AS barrio
+	,R.tipo AS rango_etario
     ,COUNT(DISTINCT id_alquiler) AS cant_alta_alquiler
   FROM
     TERCER_MALON.BI_fact_alquiler FA
     JOIN TERCER_MALON.BI_tiempo T ON FA.id_tiempo_alta=T.id_tiempo
-  --hacer joins
-  GROUP BY anio, cuatrimestre, id_rango_etario_inq, id_barrio
+	JOIN TERCER_MALON.BI_ubicacion_barrio B ON FA.id_barrio=B.id_barrio
+	JOIN TERCER_MALON.BI_rango_etario R ON FA.id_rango_etario_inq=R.id_rango_etario
+  GROUP BY anio, cuatrimestre, B.nombre, R.tipo
 GO
 
 --4
@@ -729,14 +732,16 @@ AS
   SELECT
     anio
     ,mes
-    ,id_tipo_inmueble
-    ,id_localidad
+    ,I.tipo AS tipo_inmueble
+    ,L.nombre_localidad AS localidad
+	,L.nombre_provincia AS provincia
     ,ROUND(AVG(precio_por_m2),2) AS prom_precio_por_m2
   FROM
-    TERCER_MALON.BI_fact_venta
+    TERCER_MALON.BI_fact_venta fv
     JOIN TERCER_MALON.BI_tiempo ON id_tiempo_venta=id_tiempo
-  --joins
-  GROUP BY anio, mes, id_tipo_inmueble, id_localidad
+	JOIN TERCER_MALON.BI_tipo_inmueble I ON FV.id_tipo_inmueble=I.id_tipo_inmueble
+	JOIN TERCER_MALON.BI_ubicacion_localidad L ON FV.id_localidad=L.id_localidad
+  GROUP BY anio, mes, I.tipo, L.nombre_localidad, L.nombre_provincia
 GO
 
 --7
@@ -745,13 +750,15 @@ AS
     SELECT
 		  anio
 		  ,mes
-		  ,id_operacion
-		  ,id_sucursal
+		  ,O.tipo AS tipo_operacion
+		  ,S.nombre AS nombre_sucursal
 		  ,ROUND(AVG(comision),2) AS prom_comision
     FROM
-      TERCER_MALON.BI_fact_operacion 
+      TERCER_MALON.BI_fact_operacion FO
       JOIN TERCER_MALON.BI_tiempo ON id_tiempo_concretado=id_tiempo
-	GROUP BY anio, mes, id_operacion, id_sucursal
+	  JOIN TERCER_MALON.BI_tipo_operacion O ON FO.id_operacion=O.id_operacion
+	  JOIN TERCER_MALON.BI_sucursal S ON FO.id_sucursal=S.id_sucursal
+	GROUP BY anio, mes, O.tipo, S.nombre
 GO
 
 --8
@@ -759,32 +766,34 @@ CREATE VIEW TERCER_MALON.V_Operacion_Porcentaje_Concretados
 AS
   SELECT
     anio
-    ,id_sucursal
-    ,id_rango_etario_agente
+    ,S.nombre AS nombre_sucursal
+    ,R.tipo AS rango_etario
     ,CAST((COUNT(*) *100 / (SELECT COUNT(DISTINCT id_anuncio) --total anuncios segun anio
 				FROM TERCER_MALON.BI_fact_anuncio FA
 				JOIN TERCER_MALON.BI_tiempo T ON FA.id_tiempo=T.id_tiempo
-				WHERE T.anio = anio )) as numeric(18,2)) AS porcentaje_concretados_segun_total_anuncios
+				WHERE T.anio = anio )) AS NUMERIC(18,2)) AS porcentaje_concretados_segun_total_anuncios
   FROM
-    TERCER_MALON.BI_fact_operacion
+    TERCER_MALON.BI_fact_operacion FO
     JOIN TERCER_MALON.BI_tiempo ON id_tiempo_concretado=id_tiempo
-  --joins
-  GROUP BY anio, id_sucursal, id_rango_etario_agente
+	JOIN TERCER_MALON.BI_sucursal S ON FO.id_sucursal=S.id_sucursal
+	JOIN TERCER_MALON.BI_rango_etario R ON FO.id_rango_etario_agente=R.id_rango_etario
+  GROUP BY anio, S.nombre, R.tipo
 GO
 
 --9
 CREATE VIEW TERCER_MALON.V_Operacion_Monto_Total_Cierre
 AS
   SELECT
-    anio
-    ,cuatrimestre
-    ,id_sucursal
-    ,id_operacion
-    ,id_moneda
+	cuatrimestre
+    ,S.id_sucursal AS nombre_sucursal
+    ,O.tipo AS tipo_operacion
+    ,M.nombre AS tipo_moneda
     ,SUM(monto_cierre) AS monto_total_cierre
   FROM
-    TERCER_MALON.BI_fact_operacion
-    JOIN TERCER_MALON.BI_tiempo ON BI_fact_operacion.id_tiempo_concretado=BI_tiempo.id_tiempo
-  --joins
-  GROUP BY anio, cuatrimestre, id_sucursal, id_operacion, id_moneda
+    TERCER_MALON.BI_fact_operacion FO
+    JOIN TERCER_MALON.BI_tiempo ON id_tiempo_concretado=BI_tiempo.id_tiempo
+	JOIN TERCER_MALON.BI_sucursal S ON FO.id_sucursal=S.id_sucursal
+	JOIN TERCER_MALON.BI_tipo_operacion O ON FO.id_operacion=O.id_operacion
+	JOIN TERCER_MALON.BI_tipo_moneda M ON FO.id_moneda=M.id_moneda
+  GROUP BY cuatrimestre, S.id_sucursal, O.tipo, M.nombre
 GO
