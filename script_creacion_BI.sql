@@ -2,12 +2,6 @@ USE GD2C2023
 GO
 
 -- -----------------------------------------------------
--- Schema TERCER_MALON
--- -----------------------------------------------------
-CREATE SCHEMA TERCER_MALON
-GO
-
--- -----------------------------------------------------
 -- Table TERCER_MALON.BI_tiempo
 -- -----------------------------------------------------
 CREATE TABLE TERCER_MALON.BI_tiempo
@@ -785,7 +779,7 @@ CREATE VIEW TERCER_MALON.V_Operacion_Monto_Total_Cierre
 AS
   SELECT
 	cuatrimestre
-    ,S.id_sucursal AS nombre_sucursal
+    ,S.nombre AS nombre_sucursal
     ,O.tipo AS tipo_operacion
     ,M.nombre AS tipo_moneda
     ,SUM(monto_cierre) AS monto_total_cierre
