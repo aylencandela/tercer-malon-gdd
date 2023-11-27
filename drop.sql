@@ -276,6 +276,18 @@ BEGIN
     PRINT '<<< DROPPED TABLE BI_tiempo >>>'
 END
 GO
+IF OBJECT_ID('TERCER_MALON.BI_anuncio') IS NOT NULL
+BEGIN
+    DROP table TERCER_MALON.BI_anuncio
+    PRINT '<<< DROPPED TABLE BI_anuncio >>>'
+END
+GO
+IF OBJECT_ID('TERCER_MALON.BI_cod_operacion') IS NOT NULL
+BEGIN
+    DROP table TERCER_MALON.BI_cod_operacion
+    PRINT '<<< DROPPED TABLE BI_cod_operacion >>>'
+END
+GO
 IF OBJECT_ID('TERCER_MALON.BI_ubicacion_localidad') IS NOT NULL
 BEGIN
     DROP table TERCER_MALON.BI_ubicacion_localidad
@@ -420,6 +432,6 @@ BEGIN
 END
 GO
 
-IF EXISTS (SELECT * FROM sys.objects WHERE name = 'TERCER_MALON')
+
 DROP SCHEMA TERCER_MALON
-GO
+
