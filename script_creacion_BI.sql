@@ -181,33 +181,24 @@ GO
 -- -----------------------------------------------------
 CREATE TABLE TERCER_MALON.BI_fact_alquiler
 (
-  id_alquiler          NUMERIC(18,0) NOT NULL
-  ,id_barrio           NUMERIC(18,0) NOT NULL
-  ,id_tiempo_alta      NUMERIC(18,0) NOT NULL
-  -- segun fecha_inicio = alta alquiler
-  ,id_rango_etario_inq NUMERIC(18,0) NOT NULL
-  ,id_tiempo_pago      NUMERIC(18,0) NOT NULL
-  ,id_tiempo_fin_periodo      NUMERIC(18,0) NOT NULL
-  ,es_pago_atrasado	   BIT			 NOT NULL
-  ,id_estado_alquiler  NUMERIC(18,0) NOT NULL
-  ,incremento          NUMERIC(18,2) NOT NULL
-  ,id_operacion        NUMERIC(18,0) NOT NULL
-  ,id_sucursal         NUMERIC(18,0) NOT NULL
-  ,id_moneda           NUMERIC(18,0) NOT NULL
+  id_barrio				NUMERIC(18,0) NOT NULL
+  ,id_tiempo_alta		NUMERIC(18,0) NOT NULL -- segun fecha_inicio = alta alquiler
+  ,id_rango_etario_inq	NUMERIC(18,0) NOT NULL
+  ,id_operacion			NUMERIC(18,0) NOT NULL
+  ,id_sucursal			NUMERIC(18,0) NOT NULL
+  ,id_moneda			NUMERIC(18,0) NOT NULL
   ,id_rango_etario_empl NUMERIC(18,0) NOT NULL
-  ,comision            NUMERIC(18,2) NOT NULL
-  ,CONSTRAINT FK_BI_alquiler_BI_alquiler1 FOREIGN KEY (id_alquiler) REFERENCES TERCER_MALON.BI_cod_operacion (id_cod_operacion)
+  ,comision				NUMERIC(18,2) NOT NULL
+  ,cant_alta			NUMERIC(18,0) NOT NULL
+  ,monto_total			NUMERIC(18,2) NOT NULL
   ,CONSTRAINT FK_BI_alquiler_BI_ubicacion_barrio1 FOREIGN KEY (id_barrio) REFERENCES TERCER_MALON.BI_ubicacion_barrio (id_barrio)
   ,CONSTRAINT FK_BI_alquiler_BI_tiempo1 FOREIGN KEY (id_tiempo_alta) REFERENCES TERCER_MALON.BI_tiempo (id_tiempo)
   ,CONSTRAINT FK_BI_alquiler_BI_rango_etario1 FOREIGN KEY (id_rango_etario_inq) REFERENCES TERCER_MALON.BI_rango_etario (id_rango_etario)
-  ,CONSTRAINT FK_BI_alquiler_BI_tiempo2 FOREIGN KEY (id_tiempo_pago) REFERENCES TERCER_MALON.BI_tiempo (id_tiempo)
-  ,CONSTRAINT FK_BI_alquiler_BI_tiempo3 FOREIGN KEY (id_tiempo_fin_periodo) REFERENCES TERCER_MALON.BI_tiempo (id_tiempo)
-  ,CONSTRAINT FK_BI_alquiler_BI_estado_alquiler1 FOREIGN KEY (id_estado_alquiler) REFERENCES TERCER_MALON.BI_estado_alquiler (id_estado_alquiler)
   ,CONSTRAINT FK_BI_alquiler_BI_tipo_operacion1 FOREIGN KEY (id_operacion) REFERENCES TERCER_MALON.BI_tipo_operacion (id_operacion)
   ,CONSTRAINT FK_BI_alquiler_BI_sucursal1 FOREIGN KEY (id_sucursal) REFERENCES TERCER_MALON.BI_sucursal (id_sucursal)
   ,CONSTRAINT FK_BI_alquiler_BI_tipo_moneda1 FOREIGN KEY (id_moneda) REFERENCES TERCER_MALON.BI_tipo_moneda (id_moneda)
   ,CONSTRAINT FK_BI_alquiler_BI_rango_etario2 FOREIGN KEY (id_rango_etario_empl) REFERENCES TERCER_MALON.BI_rango_etario (id_rango_etario)
-  ,CONSTRAINT PK_BI_fact_alquiler PRIMARY KEY (id_alquiler, id_barrio, id_tiempo_alta, id_rango_etario_inq, id_tiempo_pago, id_tiempo_fin_periodo, id_estado_alquiler, id_operacion, id_sucursal, id_moneda, id_rango_etario_empl)
+  ,CONSTRAINT PK_BI_fact_alquiler PRIMARY KEY (id_barrio, id_tiempo_alta, id_rango_etario_inq, id_operacion, id_sucursal, id_moneda, id_rango_etario_empl)
 );
 GO
 
@@ -515,47 +506,38 @@ GO
 
 
 -- Table TERCER_MALON.BI_fact_alquiler
-INSERT INTO TERCER_MALON.BI_fact_alquiler
-           (id_alquiler
-		   ,id_barrio
+INSERT INTO TERCER_MALON.BI_fact_alquiler -- 10274 ( de 12842 alquileres totales)
+           (id_barrio
            ,id_tiempo_alta
            ,id_rango_etario_inq
-		   ,id_tiempo_pago
-		   ,id_tiempo_fin_periodo
-		   ,es_pago_atrasado
-           ,id_estado_alquiler
-           ,incremento
            ,id_operacion
            ,id_sucursal
 		   ,comision
            ,id_moneda
-		   ,id_rango_etario_empl)
+		   ,id_rango_etario_empl
+		   ,cant_alta
+		   ,monto_total)
     SELECT
-		A.cod_alquiler,
 		I.id_barrio,
-		(SELECT TERCER_MALON.FN_id_tiempo_segun_fecha(A.fecha_inicio)) AS fecha_alta,
-		(SELECT TERCER_MALON.FN_id_etario_segun_nacimiento(INQ.fecha_nacimiento)) AS id_rango_etario_inq,
-		(SELECT TERCER_MALON.FN_id_tiempo_segun_fecha(PA.fecha)) AS fecha_pago,
-		(SELECT TERCER_MALON.FN_id_tiempo_segun_fecha(PA.fecha_fin_periodo)) AS fecha_fin_periodo,
-		(CASE WHEN PA.fecha>PA.fecha_fin_periodo THEN 1 ELSE 0 END) AS es_pago_atrasado,
-		A.id_estado_alquiler,
-		ISNULL((PA.importe - (SELECT importe as importe_mes_anterior FROM TERCER_MALON.pago_alquiler PA2
-								WHERE PA2.cod_alquiler=A.cod_alquiler AND DATEDIFF(MONTH,PA2.fecha, PA.fecha)=1))
-			/ (SELECT importe as importe_mes_anterior FROM TERCER_MALON.pago_alquiler PA2
-			WHERE PA2.cod_alquiler=A.cod_alquiler AND DATEDIFF(MONTH,PA2.fecha, PA.fecha)=1),0) *100 AS incremento_respecto_mes_anterior,
+		T1.id_tiempo AS fecha_alta,
+		RE.id_rango_etario AS id_rango_etario_inq,
 		AN.id_operacion,
 		AG.cod_sucursal,
-		A.comision,
+		AVG(A.comision) AS comision,
 		AN.id_moneda,
-		(SELECT TERCER_MALON.FN_id_etario_segun_nacimiento(AG.fecha_nacimiento)) AS id_rango_etario_empl
+		RE2.id_rango_etario AS id_rango_etario_empl,
+		COUNT(DISTINCT A.cod_alquiler) AS cant_alta,
+		SUM(A.deposito) AS monto_total
 	FROM TERCER_MALON.alquiler A
 	JOIN TERCER_MALON.inquilino INQ ON A.id_inquilino=INQ.id_inquilino
-	JOIN TERCER_MALON.pago_alquiler PA ON A.cod_alquiler=PA.cod_alquiler
 	JOIN TERCER_MALON.anuncio AN ON A.cod_anuncio=AN.cod_anuncio
 	JOIN TERCER_MALON.agente AG ON AN.id_agente=AG.id_agente
 	JOIN TERCER_MALON.inmueble I ON AN.cod_inmueble=I.cod_inmueble
+	JOIN TERCER_MALON.BI_tiempo T1 ON MONTH(A.fecha_inicio)=T1.mes AND YEAR(A.fecha_inicio)=T1.anio
+	JOIN TERCER_MALON.BI_rango_etario RE ON (SELECT TERCER_MALON.FN_id_etario_segun_nacimiento(INQ.fecha_nacimiento)) = RE.id_rango_etario
+	JOIN TERCER_MALON.BI_rango_etario RE2 ON (SELECT TERCER_MALON.FN_id_etario_segun_nacimiento(AG.fecha_nacimiento)) = RE2.id_rango_etario
+	GROUP BY T1.id_tiempo, I.id_barrio, RE.id_rango_etario, AN.id_operacion, AG.cod_sucursal, AN.id_moneda, RE2.id_rango_etario
 GO
--- ALQUILERES=12842, PAGOS=229004
 
 
 -- Table TERCER_MALON.BI_fact_venta
