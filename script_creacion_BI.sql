@@ -788,7 +788,7 @@ AS
     ,R.tipo AS rango_etario
     ,SUM(cant_alta) *100 --total anuncios (operaciones) concretados segun anio
 	/ (SELECT SUM(FA.cant_publicados) FROM TERCER_MALON.BI_fact_anuncio FA --total anuncios del anio
-		JOIN TERCER_MALON.BI_tiempo T2 ON FA.id_tiempo=T2.id_tiempo WHERE T2.anio=T.anio) 
+		JOIN TERCER_MALON.BI_tiempo T2 ON FA.id_tiempo=T2.id_tiempo WHERE T2.anio=T.anio) AS porcentaje_concretados
   FROM
     TERCER_MALON.BI_fact_operacion FO
     JOIN TERCER_MALON.BI_tiempo T ON id_tiempo_concretado=T.id_tiempo
