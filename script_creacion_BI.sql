@@ -243,7 +243,7 @@ CREATE TABLE TERCER_MALON.BI_fact_venta
   ,CONSTRAINT FK_BI_venta_BI_tipo_operacion1 FOREIGN KEY (id_operacion) REFERENCES TERCER_MALON.BI_tipo_operacion (id_operacion)
   ,CONSTRAINT FK_BI_venta_BI_sucursal1 FOREIGN KEY (id_sucursal) REFERENCES TERCER_MALON.BI_sucursal (id_sucursal)
   ,CONSTRAINT FK_BI_venta_BI_tipo_moneda1 FOREIGN KEY (id_moneda) REFERENCES TERCER_MALON.BI_tipo_moneda (id_moneda)
-  ,CONSTRAINT FK_BI_venta_BI_rango_etario2 FOREIGN KEY (id_rango_etario_empl) REFERENCES TERCER_MALON.BI_rango_etario (id_rango_etario)
+  ,CONSTRAINT FK_BI_venta_BI_rango_etario1 FOREIGN KEY (id_rango_etario_empl) REFERENCES TERCER_MALON.BI_rango_etario (id_rango_etario)
   ,CONSTRAINT PK_BI_fact_venta PRIMARY KEY (id_tiempo_venta, id_tipo_inmueble,id_localidad_inm, id_rango_m2, id_operacion, id_sucursal, id_moneda, id_rango_etario_empl)
 ); --entendemos por ventas concretas todas aquellas ventas que estan en la tabla TERCER_MALON.venta
 GO
@@ -254,22 +254,19 @@ GO
 CREATE TABLE TERCER_MALON.BI_fact_operacion
 (
   id_sucursal             NUMERIC(18,0) NOT NULL
-  ,id_venta_alq			  NUMERIC(18,0) NOT NULL
   ,id_rango_etario_agente NUMERIC(18,0) NOT NULL
-  ,id_tiempo_concretado   NUMERIC(18,0) NOT NULL
-  -- segun fecha_venta o fecha_inicio alquiler = concretados
+  ,id_tiempo_concretado   NUMERIC(18,0) NOT NULL -- segun fecha_venta o fecha_inicio alquiler = concretados
   ,id_operacion           NUMERIC(18,0) NOT NULL
   ,id_moneda              NUMERIC(18,0) NOT NULL
+  ,cant_alta			  NUMERIC(18,0) NOT NULL
   ,comision               NUMERIC(18,2) NOT NULL
   ,monto_cierre           NUMERIC(18,2) NOT NULL
-  --expensa inmueble
   ,CONSTRAINT FK_BI_operacion_BI_sucursal1 FOREIGN KEY (id_sucursal) REFERENCES TERCER_MALON.BI_sucursal (id_sucursal)
-  ,CONSTRAINT FK_BI_operacion_BI_cod_operacion1 FOREIGN KEY (id_venta_alq) REFERENCES TERCER_MALON.BI_cod_operacion (id_cod_operacion)
   ,CONSTRAINT FK_BI_operacion_BI_rango_etario1 FOREIGN KEY (id_rango_etario_agente) REFERENCES TERCER_MALON.BI_rango_etario (id_rango_etario)
   ,CONSTRAINT FK_BI_operacion_BI_tiempo1 FOREIGN KEY (id_tiempo_concretado) REFERENCES TERCER_MALON.BI_tiempo (id_tiempo)
   ,CONSTRAINT FK_BI_operacion_BI_tipo_operacion1 FOREIGN KEY (id_operacion) REFERENCES TERCER_MALON.BI_tipo_operacion (id_operacion)
   ,CONSTRAINT FK_BI_operacion_BI_tipo_moneda1 FOREIGN KEY (id_moneda) REFERENCES TERCER_MALON.BI_tipo_moneda (id_moneda)
-  ,CONSTRAINT PK_BI_fact_operacion PRIMARY KEY (id_sucursal, id_venta_alq, id_rango_etario_agente, id_tiempo_concretado, id_operacion, id_moneda)
+  ,CONSTRAINT PK_BI_fact_operacion PRIMARY KEY (id_sucursal, id_rango_etario_agente, id_tiempo_concretado, id_operacion, id_moneda)
 );
 GO
 
@@ -554,13 +551,13 @@ INSERT INTO TERCER_MALON.BI_fact_alquiler -- 10274 ( de 12842 alquileres totales
 	GROUP BY T1.id_tiempo, I.id_barrio, RE.id_rango_etario, AN.id_operacion, AG.cod_sucursal, AN.id_moneda, RE2.id_rango_etario
 GO
 
-INSERT INTO [TERCER_MALON].[BI_fact_pago_alquiler] -- 149 de 229004 pagos
-           ([id_tiempo_periodo]
-           ,[cant_pagos]
-           ,[cant_pagos_atrasados]
-           ,[monto_mes]
-           ,[monto_mes_anterior]
-		   ,[id_estado_alquiler])
+INSERT INTO TERCER_MALON.BI_fact_pago_alquiler -- 149 de 229004 pagos
+           (id_tiempo_periodo
+           ,cant_pagos
+           ,cant_pagos_atrasados
+           ,monto_mes
+           ,monto_mes_anterior
+		   ,id_estado_alquiler)
     SELECT
 		T1.id_tiempo AS id_tiempo_periodo,
 		COUNT(*) AS cant_pagos,
@@ -618,40 +615,39 @@ INSERT INTO TERCER_MALON.BI_fact_venta -- 3964 de 4058 ventas total
 	GROUP BY T.id_tiempo, I.id_tipo_inmueble, B.id_localidad, R.id_rango_m2,AN.id_operacion,AG.cod_sucursal,V.id_moneda, RE.id_rango_etario
 GO
 
-
--- Table TERCER_MALON.BI_fact_operacion 16900 -> ALQUILERES=12842 + VENTA=4058
-INSERT INTO TERCER_MALON.BI_fact_operacion
+-- Table TERCER_MALON.BI_fact_operacion
+INSERT INTO TERCER_MALON.BI_fact_operacion -- 25
            (id_sucursal
-		   ,id_venta_alq
            ,id_rango_etario_agente
            ,id_tiempo_concretado
            ,id_operacion
            ,id_moneda
+		   ,cant_alta
            ,comision
 		   ,monto_cierre)
 		SELECT
 			 id_sucursal
-			 ,id_alquiler
 			 ,id_rango_etario_empl
 			 ,id_tiempo_alta
 			 ,id_operacion
 			 ,id_moneda
-			 ,comision
-			 ,(SELECT importe FROM TERCER_MALON.pago_alquiler WHERE cod_alquiler=FA.id_alquiler AND nro_periodo=0) AS cierre
-				-- tomamos importe porque para algunos alquileres no hay detalle_pago iniciales cargados
+			 ,SUM(cant_alta)
+			 ,AVG(comision)
+			 ,SUM(monto_total)
 		 FROM TERCER_MALON.BI_fact_alquiler FA
+		 GROUP BY id_sucursal, id_rango_etario_empl, id_tiempo_alta, id_operacion, id_moneda
 	 UNION
 		 SELECT
 			 id_sucursal
-			 ,id_venta
 			 ,id_rango_etario_empl
 			 ,id_tiempo_venta
 			 ,id_operacion
 			 ,id_moneda
-			 ,comision
-			 ,precio_venta
+			 ,SUM(cant_alta)
+			 ,AVG(comision)
+			 ,SUM(monto_total)
 		 FROM TERCER_MALON.BI_fact_venta
-	ORDER BY 2, id_operacion
+		 GROUP BY id_sucursal, id_rango_etario_empl, id_tiempo_venta, id_operacion, id_moneda
 GO
 
 -- -----------------------------------------------------
@@ -800,14 +796,6 @@ AS
 	JOIN TERCER_MALON.BI_rango_etario R ON FO.id_rango_etario_agente=R.id_rango_etario
   GROUP BY T.anio, S.nombre, R.tipo
 GO
-
-select anio, fa.id_operacion, sum(FA.cant_concretados) FROM TERCER_MALON.BI_fact_anuncio FA 
-JOIN TERCER_MALON.BI_tiempo T ON FA.id_tiempo=T.id_tiempo
-group by anio, fa.id_operacion
-/*
-2024	12262
-2027	4638
-*/
 
 --9
 CREATE VIEW TERCER_MALON.V_Operacion_Monto_Total_Cierre
