@@ -203,6 +203,23 @@ CREATE TABLE TERCER_MALON.BI_fact_alquiler
 GO
 
 -- -----------------------------------------------------
+-- Table TERCER_MALON.BI_fact_pago_alquiler
+-- -----------------------------------------------------
+CREATE TABLE TERCER_MALON.BI_fact_pago_alquiler
+(
+  id_tiempo_periodo			NUMERIC(18,0) NOT NULL
+  ,cant_pagos				NUMERIC(18,0) NOT NULL
+  ,cant_pagos_atrasados		NUMERIC(18,0) NOT NULL
+  ,monto_mes				NUMERIC(18,2) NOT NULL
+  ,monto_mes_anterior		NUMERIC(18,2) NOT NULL
+  ,id_estado_alquiler		NUMERIC(18,0) NOT NULL
+  ,CONSTRAINT FK_BI_fact_pago_alquiler_BI_tiempo1 FOREIGN KEY (id_tiempo_periodo) REFERENCES TERCER_MALON.BI_tiempo (id_tiempo)
+  ,CONSTRAINT FK_BI_fact_pago_alquiler_BI_estado_alquiler1 FOREIGN KEY (id_estado_alquiler) REFERENCES TERCER_MALON.BI_estado_alquiler (id_estado_alquiler)
+  ,CONSTRAINT PK_BI_fact_pago_alquiler PRIMARY KEY (id_tiempo_periodo, id_estado_alquiler)
+);
+GO
+
+-- -----------------------------------------------------
 -- Table TERCER_MALON.BI_fact_venta
 -- -----------------------------------------------------
 CREATE TABLE TERCER_MALON.BI_fact_venta
@@ -539,6 +556,31 @@ INSERT INTO TERCER_MALON.BI_fact_alquiler -- 10274 ( de 12842 alquileres totales
 	GROUP BY T1.id_tiempo, I.id_barrio, RE.id_rango_etario, AN.id_operacion, AG.cod_sucursal, AN.id_moneda, RE2.id_rango_etario
 GO
 
+INSERT INTO [TERCER_MALON].[BI_fact_pago_alquiler] -- 149 de 229004 pagos
+           ([id_tiempo_periodo]
+           ,[cant_pagos]
+           ,[cant_pagos_atrasados]
+           ,[monto_mes]
+           ,[monto_mes_anterior]
+		   ,[id_estado_alquiler])
+    SELECT
+		T1.id_tiempo AS id_tiempo_periodo,
+		COUNT(*) AS cant_pagos,
+		SUM(CASE WHEN fecha > fecha_fin_periodo THEN 1 ELSE 0 END) AS cant_pagos_atrasados,
+		SUM(importe)/COUNT(*) AS monto_mes,
+		ISNULL((SELECT SUM(importe)/COUNT(*) AS monto_mes_anterior FROM TERCER_MALON.pago_alquiler P2 JOIN TERCER_MALON.alquiler A2 ON P2.cod_alquiler=A2.cod_alquiler
+			WHERE A2.id_estado_alquiler=A.id_estado_alquiler AND
+			((T1.mes=1 and MONTH(P2.fecha_inicio_periodo)=12 AND YEAR(p2.fecha_inicio_periodo)=T1.anio-1)
+																	--si el mes actual es enero, busco el monto de diciembre del año anterior
+																	OR (MONTH(p2.fecha_inicio_periodo)=T1.mes-1 and YEAR(p2.fecha_inicio_periodo)=T1.anio))),0) AS monto_mes_anterior,
+		A.id_estado_alquiler
+	FROM TERCER_MALON.pago_alquiler PA
+	JOIN TERCER_MALON.alquiler A ON PA.cod_alquiler=A.cod_alquiler
+	JOIN TERCER_MALON.BI_tiempo T1 ON MONTH(PA.fecha)=T1.mes AND YEAR(PA.fecha)=T1.anio
+	GROUP BY T1.id_tiempo, A.id_estado_alquiler, anio, mes
+	ORDER BY anio, mes
+GO
+--Para calcular el aumento tengo que restar ambos montos luego de dividirlos por la cantidad de pagos de c/u ( (mes actual/t_pagos)	- (mes_ant/t_pagos))
 
 -- Table TERCER_MALON.BI_fact_venta
 INSERT INTO TERCER_MALON.BI_fact_venta
@@ -676,7 +718,7 @@ GO
 
 
 --4		73
-CREATE VIEW TERCER_MALON.V_Alquiler_Incumplimiento_Pagos
+CREATE VIEW TERCER_MALON.V_Pago_Alquiler_Incumplimiento
 AS
   SELECT
 	anio
@@ -689,19 +731,19 @@ AS
 GO
 
 --5		5
-CREATE VIEW TERCER_MALON.V_Alquiler_Promedio_Incremento_Valor
+CREATE VIEW TERCER_MALON.V_Pago_Alquiler_Promedio_Incremento
 AS
   SELECT
     anio
     ,mes
-	,(SUM(monto_mes)-SUM(monto_mes_anterior)) *100 / SUM(monto_mes) AS incremento
+	,(AVG(monto_mes)-AVG(monto_mes_anterior)) *100 / AVG(monto_mes) AS incremento
   FROM
     TERCER_MALON.BI_fact_pago_alquiler
 	JOIN TERCER_MALON.BI_tiempo ON id_tiempo_periodo=id_tiempo
   WHERE
 	id_estado_alquiler=(SELECT id_estado_alquiler FROM TERCER_MALON.BI_estado_alquiler WHERE tipo='Activo')
   GROUP BY anio, mes
-  HAVING SUM(monto_mes)-SUM(monto_mes_anterior) >0
+  HAVING AVG(monto_mes)-AVG(monto_mes_anterior) >0
 GO
 
 --6		3755
