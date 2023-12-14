@@ -133,25 +133,6 @@ CREATE TABLE TERCER_MALON.BI_estado_alquiler
 GO
 
 -- -----------------------------------------------------
--- Table TERCER_MALON.BI_anuncio
--- -----------------------------------------------------
-CREATE TABLE TERCER_MALON.BI_anuncio
-(
-  id_anuncio NUMERIC(19,0) NOT NULL
-  ,CONSTRAINT PK_BI_anuncio PRIMARY KEY (id_anuncio)
-);
-GO
--- -----------------------------------------------------
--- Table TERCER_MALON.BI_cod_operacion
--- -----------------------------------------------------
-CREATE TABLE TERCER_MALON.BI_cod_operacion
-(
-  id_cod_operacion NUMERIC(18,0) NOT NULL
-  ,CONSTRAINT PK_BI_cod_operacion PRIMARY KEY (id_cod_operacion)
-);
-GO
-
--- -----------------------------------------------------
 -- Table TERCER_MALON.BI_fact_anuncio
 -- -----------------------------------------------------
 CREATE TABLE TERCER_MALON.BI_fact_anuncio
@@ -363,24 +344,6 @@ SELECT
 FROM
   TERCER_MALON.localidad
   JOIN TERCER_MALON.provincia ON localidad.id_provincia = provincia.id_provincia
-GO
-
--- Table TERCER_MALON.BI_anuncio
-INSERT INTO TERCER_MALON.BI_anuncio
-	(
-	  id_anuncio
-	)
-	SELECT cod_anuncio FROM TERCER_MALON.anuncio
-GO
-
--- Table TERCER_MALON.BI_cod_operacion
-INSERT INTO TERCER_MALON.BI_cod_operacion
-(
-  id_cod_operacion 
-)
-	SELECT cod_alquiler FROM TERCER_MALON.alquiler	--cod alquileres concretados
-	UNION
-	SELECT cod_venta FROM TERCER_MALON.venta		--cod ventas concretados
 GO
 
 -- Table TERCER_MALON.BI_sucursal
